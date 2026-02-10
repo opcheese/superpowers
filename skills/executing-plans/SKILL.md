@@ -7,9 +7,9 @@ description: Use when you have a written implementation plan to execute in a sep
 
 ## Overview
 
-Load plan, review critically, execute tasks in batches, report for review between batches.
+Load plan, review critically, execute tasks in batches, report for review between batches, demand human verification before proceeding.
 
-**Core principle:** Batch execution with checkpoints for architect review.
+**Core principle:** Batch execution with checkpoints for architect review + mandatory human verification before proceeding to next batch.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
@@ -30,16 +30,17 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
-### Step 3: Report
+### Step 3: Report and Demand Human Verification
 When batch complete:
 - Show what was implemented
 - Show verification output
-- Say: "Ready for feedback."
+- Say: "Ready for your review. Please verify the work before I continue."
+- **WAIT for explicit human approval before proceeding. Do not move to the next batch until the human has verified and given a definitive go-ahead.**
 
 ### Step 4: Continue
-Based on feedback:
+Based on human feedback:
 - Apply changes if needed
-- Execute next batch
+- Only proceed to next batch after human explicitly approves
 - Repeat until complete
 
 ### Step 5: Complete Development
@@ -72,7 +73,8 @@ After all tasks complete and verified:
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference skills when plan says to
-- Between batches: just report and wait
+- Between batches: report, demand human verification, and wait for explicit approval
+- Never proceed to next batch without human sign-off
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
 

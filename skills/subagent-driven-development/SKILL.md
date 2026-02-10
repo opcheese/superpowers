@@ -5,9 +5,9 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review, then human verfication.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration. Once work is done present the work for human for verification BEFORE proceeding and DEMAND the work to be checked.
 
 ## When to Use
 
@@ -75,6 +75,7 @@ digraph process {
     "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
     "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
     "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
+    "Demand work review by human. Do not proceed to more tasks until got a definitive go ahead from human"
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
@@ -119,6 +120,9 @@ Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 [Get git SHAs, dispatch code quality reviewer]
 Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
+[Demand review from the human]
+Human says that they have tested the result and everything is ok.
+
 [Mark Task 1 complete]
 
 Task 2: Recovery modes
@@ -152,6 +156,18 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
+
+[Demand review from the human]
+Human asks to to make the PROGRESS_INTERVAL an .env variable
+
+[Implementer fixes]
+Implementer: Added to .env, added to .env.sample, implemented .env support.
+
+[Code reviewer reviews again]
+Code reviewer: ✅ Approved
+
+[Demand review from the human]
+Human oks the work.
 
 [Mark Task 2 complete]
 
@@ -201,6 +217,7 @@ Done!
 **Never:**
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
+- Skip human verification, demand human responsibility for the code
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
@@ -211,6 +228,7 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
+- Move to the next task while human did not verify the work
 
 **If subagent asks questions:**
 - Answer clearly and completely
