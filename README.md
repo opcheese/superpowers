@@ -1,25 +1,66 @@
-# Superpowers
+# Superpowers — Agents Branch
 
-Superpowers is a complete software development workflow for your coding agents, built on top of a set of composable "skills" and some initial instructions that make sure your agent uses them.
+> **This is the `agents` branch** — adapted for unattended Claude Code sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. For the interactive version with human oversight, see the `main` branch.
+
+Superpowers is a complete software development workflow for coding agents, built on composable "skills" that trigger automatically.
+
+## What's different on this branch
+
+This branch removes all human oversight gates and interactive prompts, replacing them with **automated verification** and **escalation patterns** suitable for autonomous operation.
+
+### Key changes from `main`
+
+| Area | `main` (interactive) | `agents` (autonomous) |
+|------|---------------------|----------------------|
+| **Quality gates** | "Demand human verification" | Automated: run tests + linter, retry once, escalate on failure |
+| **Brainstorming** | Interactive Q&A, one question at a time, visual companion | Single-pass design generation with self-review via subagent |
+| **Finishing work** | Present 4 options (merge/PR/keep/discard) | Always create PR (safest default for unattended work) |
+| **Ambiguity** | Ask the user | Escalate to `docs/agent-escalations/` and continue with independent tasks |
+| **Reports** | Ask user for format preference | Default to full report format |
+| **Worktrees** | Ask user for directory preference | Auto-select `.worktrees/` |
+| **Debugging** | "Discuss with human after 3 failures" | Escalate and stop |
+| **Visual features** | Browser-based visual companion for brainstorming | Removed (server.js, WebSocket, HTML frames) |
+
+### New skill: `escalation`
+
+When an agent hits ambiguity, repeated failures, or decisions requiring human judgment:
+1. Write `docs/agent-escalations/YYYY-MM-DD-<topic>.md` with context and options
+2. Mark current task as blocked
+3. Continue with other independent tasks
+
+### Modified skills (12)
+
+- **brainstorming** — single-pass design, no interactive Q&A, no visual companion
+- **subagent-driven-development** — automated verification gate replaces human review between tasks
+- **executing-plans** — automated verification replaces human approval
+- **dispatching-parallel-agents** — automated verification replaces human demand
+- **finishing-a-development-branch** — always create PR, no option menu
+- **using-git-worktrees** — auto-select directory
+- **writing-plans** — auto-proceed to execution
+- **systematic-debugging** — escalate-and-stop replaces "discuss with human"
+- **end-of-day-report** — default full report format
+- **end-of-week-report** — default full report format
+- **verification-before-completion** — automated checks only
+- **receiving-code-review** — auto-assess clarity, escalate true ambiguity
+
+### Deleted files
+
+- `skills/brainstorming/scripts/server.js` — WebSocket server
+- `skills/brainstorming/scripts/helper.js` — client-side JS
+- `skills/brainstorming/scripts/frame-template.html` — HTML frame
+- `skills/brainstorming/visual-companion.md` — visual companion guide
 
 ## How it works
 
-It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
+The agent analyzes the task, generates a design spec, self-reviews it via subagent, creates an implementation plan, then executes it with fresh subagents per task — each going through spec compliance review, code quality review, and automated test verification before proceeding.
 
-Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
-
-After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
-
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
-
-There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
-
+Escalation files in `docs/agent-escalations/` collect anything the agent couldn't resolve autonomously for later human review.
 
 ## Sponsorship
 
 If Superpowers has helped you do stuff that makes money and you are so inclined, I'd greatly appreciate it if you'd consider [sponsoring my opensource work](https://github.com/sponsors/obra).
 
-Thanks! 
+Thanks!
 
 - Jesse
 

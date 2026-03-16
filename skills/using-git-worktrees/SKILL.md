@@ -35,18 +35,9 @@ grep -i "worktree.*director" CLAUDE.md 2>/dev/null
 
 **If preference specified:** Use it without asking.
 
-### 3. Ask User
+### 3. Auto-Select
 
-If no directory exists and no CLAUDE.md preference:
-
-```
-No worktree directory found. Where should I create worktrees?
-
-1. .worktrees/ (project-local, hidden)
-2. ~/.config/superpowers/worktrees/<project-name>/ (global location)
-
-Which would you prefer?
-```
+If no directory exists and no CLAUDE.md preference, default to `.worktrees/` (project-local, hidden).
 
 ## Safety Verification
 
@@ -129,9 +120,9 @@ pytest
 go test ./...
 ```
 
-**If tests fail:** Report failures, ask whether to proceed or investigate.
+**If tests fail:** Investigate and fix. If unfixable, escalate (see escalation skill).
 
-**If tests pass:** Report ready.
+**If tests pass:** Proceed.
 
 ### 5. Report Location
 
@@ -148,9 +139,9 @@ Ready to implement <feature-name>
 | `.worktrees/` exists | Use it (verify ignored) |
 | `worktrees/` exists | Use it (verify ignored) |
 | Both exist | Use `.worktrees/` |
-| Neither exists | Check CLAUDE.md → Ask user |
+| Neither exists | Check CLAUDE.md → default .worktrees/ |
 | Directory not ignored | Add to .gitignore + commit |
-| Tests fail during baseline | Report failures + ask |
+| Tests fail during baseline | Investigate, fix, or escalate |
 | No package.json/Cargo.toml | Skip dependency install |
 
 ## Common Mistakes
@@ -196,7 +187,7 @@ Ready to implement auth feature
 **Never:**
 - Create worktree without verifying it's ignored (project-local)
 - Skip baseline test verification
-- Proceed with failing tests without asking
+- Proceed with failing tests without investigating
 - Assume directory location when ambiguous
 - Skip CLAUDE.md check
 

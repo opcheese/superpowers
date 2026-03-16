@@ -67,13 +67,9 @@ Produce a report in this structure:
 - Mention the "why" when visible from commit messages or docs
 - Cap at 8 bullets — group aggressively if there are many commits
 
-## Step 4: Ask about format
+## Step 4: Output
 
-Ask the user:
-- **Standup format** — 3 short bullets (done / doing / blockers)
-- **Full report** — the structured format above
-- **Slack message** — brief paragraph, no headers
-- **Keep as-is** — show whatever was generated
+Generate the full report format by default. Save to `docs/reports/daily/YYYY-MM-DD.md` if the directory exists.
 
 ## What counts as "enrichment"
 

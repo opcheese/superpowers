@@ -126,22 +126,18 @@ After completing each chunk of the plan:
 
 **Review loop guidance:**
 - Same agent that wrote the plan fixes it (preserves context)
-- If loop exceeds 5 iterations, surface to human for guidance
+- If loop exceeds 5 iterations, escalate (see escalation skill)
 - Reviewers are advisory - explain disagreements if you believe feedback is incorrect
 
 ## Execution Handoff
 
-After saving the plan:
-
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Ready to execute?"**
+After saving the plan, proceed directly to execution:
 
 **Execution path depends on harness capabilities:**
 
 **If harness has subagents (Claude Code, etc.):**
 - **REQUIRED:** Use superpowers:subagent-driven-development
-- Do NOT offer a choice - subagent-driven is the standard approach
 - Fresh subagent per task + two-stage review
 
 **If harness does NOT have subagents:**
 - Execute plan in current session using superpowers:executing-plans
-- Batch execution with checkpoints for review

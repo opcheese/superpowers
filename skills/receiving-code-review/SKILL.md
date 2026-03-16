@@ -41,24 +41,25 @@ WHEN receiving code review feedback:
 
 ```
 IF any item is unclear:
-  STOP - do not implement anything yet
-  ASK for clarification on unclear items
+  Assess whether a safe default interpretation exists
+  IF no safe default: Escalate (see escalation skill) with the ambiguous items
+  IF safe default exists: Proceed with that interpretation, note the assumption
 
 WHY: Items may be related. Partial understanding = wrong implementation.
 ```
 
 **Example:**
 ```
-your human partner: "Fix 1-6"
+Review says: "Fix 1-6"
 You understand 1,2,3,6. Unclear on 4,5.
 
-❌ WRONG: Implement 1,2,3,6 now, ask about 4,5 later
-✅ RIGHT: "I understand items 1,2,3,6. Need clarification on 4 and 5 before proceeding."
+❌ WRONG: Implement 1,2,3,6 now, guess at 4,5
+✅ RIGHT: Implement 1,2,3,6. Escalate 4 and 5 as ambiguous (see escalation skill).
 ```
 
 ## Source-Specific Handling
 
-### From your human partner
+### From the project owner
 - **Trusted** - implement after understanding
 - **Still ask** if scope unclear
 - **No performative agreement**
@@ -77,13 +78,13 @@ IF suggestion seems wrong:
   Push back with technical reasoning
 
 IF can't easily verify:
-  Say so: "I can't verify this without [X]. Should I [investigate/ask/proceed]?"
+  Investigate further. If still uncertain, escalate (see escalation skill)
 
-IF conflicts with your human partner's prior decisions:
-  Stop and discuss with your human partner first
+IF conflicts with prior architectural decisions:
+  Escalate (see escalation skill) with both the suggestion and the conflicting decision
 ```
 
-**your human partner's rule:** "External feedback - be skeptical, but check carefully"
+**the project owner's rule:** "External feedback - be skeptical, but check carefully"
 
 ## YAGNI Check for "Professional" Features
 
@@ -95,7 +96,7 @@ IF reviewer suggests "implementing properly":
   IF used: Then implement properly
 ```
 
-**your human partner's rule:** "You and reviewer both report to me. If we don't need this feature, don't add it."
+**the project owner's rule:** "You and reviewer both report to me. If we don't need this feature, don't add it."
 
 ## Implementation Order
 
@@ -118,13 +119,13 @@ Push back when:
 - Violates YAGNI (unused feature)
 - Technically incorrect for this stack
 - Legacy/compatibility reasons exist
-- Conflicts with your human partner's architectural decisions
+- Conflicts with the project owner's architectural decisions
 
 **How to push back:**
 - Use technical reasoning, not defensiveness
 - Ask specific questions
 - Reference working tests/code
-- Involve your human partner if architectural
+- Involve the project owner if architectural
 
 **Signal if uncomfortable pushing back out loud:** "Strange things are afoot at the Circle K"
 
@@ -195,7 +196,7 @@ Reviewer: "Implement proper metrics tracking with database, date filters, CSV ex
 
 **Unclear Item (Good):**
 ```
-your human partner: "Fix items 1-6"
+the project owner: "Fix items 1-6"
 You understand 1,2,3,6. Unclear on 4,5.
 ✅ "Understand 1,2,3,6. Need clarification on 4 and 5 before implementing."
 ```

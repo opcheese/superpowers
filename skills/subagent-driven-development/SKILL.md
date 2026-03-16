@@ -9,7 +9,7 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration. Once work is done present the work for human for verification BEFORE proceeding and DEMAND the work to be checked.
+**Core principle:** Fresh subagent per task + two-stage review (spec then quality) + automated verification gate = high quality, fast iteration.
 
 ## When to Use
 
@@ -76,8 +76,12 @@ digraph process {
     "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
     "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
     "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
-    "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
-    "Demand work review by human. Do not proceed to more tasks until got a definitive go ahead from human"
+    "Code quality reviewer subagent approves?" -> "Run automated verification gate" [label="yes"];
+    "Run automated verification gate" [shape=box];
+    "Verification passed?" [shape=diamond];
+    "Run automated verification gate" -> "Verification passed?";
+    "Verification passed?" -> "Mark task complete in TodoWrite" [label="yes"];
+    "Verification passed?" -> "Escalate (see escalation skill)" [label="fail after retry"];
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
@@ -155,8 +159,7 @@ Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 [Get git SHAs, dispatch code quality reviewer]
 Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
-[Demand review from the human]
-Human says that they have tested the result and everything is ok.
+[Run automated verification gate — tests pass, linter clean]
 
 [Mark Task 1 complete]
 
@@ -192,17 +195,7 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
 
-[Demand review from the human]
-Human asks to to make the PROGRESS_INTERVAL an .env variable
-
-[Implementer fixes]
-Implementer: Added to .env, added to .env.sample, implemented .env support.
-
-[Code reviewer reviews again]
-Code reviewer: ✅ Approved
-
-[Demand review from the human]
-Human oks the work.
+[Run automated verification gate — tests pass, linter clean]
 
 [Mark Task 2 complete]
 
@@ -252,7 +245,7 @@ Done!
 **Never:**
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
-- Skip human verification, demand human responsibility for the code
+- Skip automated verification gate
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
@@ -263,7 +256,7 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
-- Move to the next task while human did not verify the work
+- Move to the next task while automated verification has not passed
 
 **If subagent asks questions:**
 - Answer clearly and completely

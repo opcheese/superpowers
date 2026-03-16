@@ -81,12 +81,13 @@ When agents return:
 - Run full test suite
 - Integrate all changes
 
-### 5. Demand Human Verification
+### 5. Automated Verification
 
 After integration:
-- Present results to the human for verification
-- **Do not consider the work done until the human has reviewed and explicitly approved**
-- The human must take responsibility for the final result
+- Run the full test suite
+- Run linter if configured
+- If both pass, proceed
+- If either fails, dispatch a fix subagent once. If still failing, escalate (see escalation skill)
 
 ## Agent Prompt Structure
 
@@ -178,7 +179,7 @@ After agents return:
 2. **Check for conflicts** - Did agents edit same code?
 3. **Run full suite** - Verify all fixes work together
 4. **Spot check** - Agents can make systematic errors
-5. **Demand human verification** - Present work to human and wait for explicit approval before considering done
+5. **Automated verification** - Run full test suite and linter. If failures, dispatch fix subagent. If still failing, escalate.
 
 ## Real-World Impact
 

@@ -85,14 +85,9 @@ Read at most 4-5 key files (plans, research docs, CHANGELOG entries). Prioritize
 - "Research & Planning" section only appears if docs were actually written
 - Cap the whole report at ~20 bullets total
 
-## Step 4: Ask about format
+## Step 4: Output
 
-| Format | Use for |
-|--------|---------|
-| **Full report** (default) | Personal record, team wiki |
-| **Executive summary** | 3-4 sentence paragraph, no headers |
-| **Bullet list** | Quick Slack/email update |
-| **Standup carry-forward** | Just the "in progress" section |
+Generate the full report format by default. Save to `docs/reports/weekly/YYYY-MM-DD.md` if the directory exists.
 
 ## What counts as "enrichment"
 
@@ -109,7 +104,7 @@ Read at most 4-5 key files (plans, research docs, CHANGELOG entries). Prioritize
 
 ## Handling multi-project weeks
 
-If commits span multiple repos, ask the user which projects to include:
+If commits span multiple repos, include all projects with activity this week:
 
 ```bash
 # Show all recent project dirs with activity
