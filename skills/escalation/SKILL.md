@@ -17,7 +17,7 @@ When you hit a situation that would normally require human judgment, escalate cl
 
 ## The Process
 
-### Step 1: Write escalation file
+### Step 1: Write escalation audit file
 
 ```bash
 mkdir -p docs/agent-escalations
@@ -46,11 +46,35 @@ Write `docs/agent-escalations/YYYY-MM-DD-<topic>.md`:
 <your best guess, if you have one — but don't act on it>
 ```
 
-### Step 2: Mark task as blocked
+### Step 2: Write machine-readable escalation signal
+
+```bash
+mkdir -p .escalations
+```
+
+Write `.escalations/<taskId>.json` where `<taskId>` is your current task ID from the system prompt or context:
+
+```json
+{
+  "taskId": "<your current task ID>",
+  "agentId": "<your agent ID>",
+  "reason": "<same problem description as the markdown file>",
+  "category": "<one of: knowledge_gap, blocked, uncertain, safety>",
+  "timestamp": "<ISO 8601 timestamp>"
+}
+```
+
+Categories:
+- `knowledge_gap` — You don't know enough to proceed
+- `blocked` — External blocker prevents progress
+- `uncertain` — You need direction on approach
+- `safety` — Action requires human authorization
+
+### Step 3: Mark task as blocked
 
 Update the task status to blocked with a reference to the escalation file.
 
-### Step 3: Continue with independent work
+### Step 4: Continue with independent work
 
 If other tasks exist that don't depend on the blocked task, proceed with those. Don't stop entirely unless everything is blocked.
 
