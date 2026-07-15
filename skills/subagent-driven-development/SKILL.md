@@ -100,10 +100,12 @@ Before dispatching Task 1, scan the plan once for conflicts:
 - anything the plan explicitly mandates that the review rubric treats as a
   defect (a test that asserts nothing, verbatim duplication of a logic block)
 
-Present everything you find to your human partner as one batched question —
-each finding beside the plan text that mandates it, asking which governs —
-before execution begins, not one interrupt per discovery mid-plan. If the
-scan is clean, proceed without comment. The review loop remains the net for
+If the scan is clean, proceed without comment. If you find conflicts, you
+cannot wait on a human to adjudicate them in unattended operation: log them
+all at once with **superpowers:escalation** — each finding beside the plan
+text that mandates it, noting which you believe governs and why — then
+proceed with the tasks the conflict does not block. Do not guess past a
+genuine conflict on the affected task. The review loop remains the net for
 conflicts that only emerge from implementation.
 
 ## Model Selection
@@ -153,7 +155,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate to the human
+4. If the plan itself is wrong, escalate via superpowers:escalation and continue with tasks the flaw does not block
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
 
@@ -229,8 +231,9 @@ final whole-branch review. When you fill a reviewer template:
   whole-branch review at that list so it can triage which must be fixed
   before merge. A roll-up nobody reads is a silent discard.
 - A finding labeled plan-mandated — or any finding that conflicts with
-  what the plan's text requires — is the human's decision, like any plan
-  contradiction: present the finding and the plan text, ask which governs.
+  what the plan's text requires — is a plan contradiction you cannot resolve
+  unattended: escalate it via superpowers:escalation with the finding beside
+  the plan text and which you believe governs.
   Do not dismiss the finding because the plan mandates it, and do not
   dispatch a fix that contradicts the plan without asking.
 - The final whole-branch review gets a package too: run
@@ -404,7 +407,7 @@ Done!
 ## Red Flags
 
 **Never:**
-- Start implementation on main/master branch without explicit user consent
+- Start implementation on main/master branch — always work on a feature branch
 - Skip task review, or accept a report missing either verdict (spec compliance AND task quality are both required)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)

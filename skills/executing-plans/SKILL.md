@@ -44,7 +44,7 @@ When all tasks complete:
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+- Follow that skill to verify tests and create a PR for review
 
 ## When to Escalate
 
