@@ -7,7 +7,9 @@ description: Use when you have a written implementation plan to execute in a sep
 
 ## Overview
 
-Load plan, review critically, execute all tasks, report when complete.
+Load plan, review critically, execute all tasks, demand human verification, report when complete.
+
+**Core principle:** Execute tasks, then present the work to your human partner and get explicit verification before considering it done.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
@@ -29,9 +31,16 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
-### Step 3: Complete Development
+### Step 3: Demand Human Verification
 
-After all tasks complete and verified:
+After all tasks complete:
+- Present the completed work to your human partner (what changed, test results)
+- Wait for their explicit verification before proceeding — do not assume approval
+- If they request changes, make them and re-verify before continuing
+
+### Step 4: Complete Development
+
+After all tasks complete and the human has verified the work:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
