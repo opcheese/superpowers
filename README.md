@@ -1,73 +1,56 @@
 # Superpowers — Agents Branch
 
-> **This is the `agents` branch** — adapted for unattended Claude Code sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. For the interactive version with human oversight, see the `main` branch.
+> **This is the `agents` branch** — a fork adapted for unattended coding sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. Synced to upstream **v6.1.1**. For the interactive upstream version with human oversight, see [obra/superpowers](https://github.com/obra/superpowers).
 
-Superpowers is a complete software development workflow for coding agents, built on composable "skills" that trigger automatically.
+Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.
 
 ## What's different on this branch
 
-This branch removes all human oversight gates and interactive prompts, replacing them with **automated verification** and **escalation patterns** suitable for autonomous operation.
+This fork removes human-oversight gates and interactive prompts, replacing them with **automated verification** and an **escalation** pattern suitable for autonomous operation. It tracks upstream and re-applies these changes on each sync.
 
-### Key changes from `main`
+| Area | upstream (interactive) | `agents` (autonomous) |
+|------|------------------------|-----------------------|
+| **Quality gates** | Reviewer verdicts + human sign-off | Same reviewer flow **plus** a controller-run automated verification gate (tests + linter); escalate on failure |
+| **Brainstorming** | Interactive Q&A + visual companion | Single-pass design generation with self-review via subagent (no companion) |
+| **Finishing work** | Present merge/PR/keep/discard menu | Always create a PR (forge-neutral: `gh`/`glab`), safest default for unattended work |
+| **Ambiguity / blockers** | Ask the human | Escalate via the `escalation` skill and continue with independent tasks |
+| **Worktrees** | Ask for consent + directory | Auto-select `.worktrees/`, no consent prompt |
+| **Debugging** | Discuss with human after repeated failures | Escalate and stop |
+| **Package manager** | `npm` in examples | `pnpm` |
 
-| Area | `main` (interactive) | `agents` (autonomous) |
-|------|---------------------|----------------------|
-| **Quality gates** | "Demand human verification" | Automated: run tests + linter, retry once, escalate on failure |
-| **Brainstorming** | Interactive Q&A, one question at a time, visual companion | Single-pass design generation with self-review via subagent |
-| **Finishing work** | Present 4 options (merge/PR/keep/discard) | Always create PR (safest default for unattended work) |
-| **Ambiguity** | Ask the user | Escalate to `docs/agent-escalations/` and continue with independent tasks |
-| **Reports** | Ask user for format preference | Default to full report format |
-| **Worktrees** | Ask user for directory preference | Auto-select `.worktrees/` |
-| **Debugging** | "Discuss with human after 3 failures" | Escalate and stop |
-| **Visual features** | Browser-based visual companion for brainstorming | Removed (server.js, WebSocket, HTML frames) |
+### Fork-only skills
 
-### New skill: `escalation`
+- **escalation** — logs a blocked decision with its context and options, then continues with independent work
+- **end-of-day-report** / **end-of-week-report** — git-driven activity summaries (author-filtered for multi-author repos)
+- **topic-research** — multi-source technical research with citations
 
-When an agent hits ambiguity, repeated failures, or decisions requiring human judgment:
-1. Write `docs/agent-escalations/YYYY-MM-DD-<topic>.md` with context and options
-2. Mark current task as blocked
-3. Continue with other independent tasks
+## We're Hiring!
 
-### Modified skills (12)
-
-- **brainstorming** — single-pass design, no interactive Q&A, no visual companion
-- **subagent-driven-development** — automated verification gate replaces human review between tasks
-- **executing-plans** — automated verification replaces human approval
-- **dispatching-parallel-agents** — automated verification replaces human demand
-- **finishing-a-development-branch** — always create PR, no option menu
-- **using-git-worktrees** — auto-select directory
-- **writing-plans** — auto-proceed to execution
-- **systematic-debugging** — escalate-and-stop replaces "discuss with human"
-- **end-of-day-report** — default full report format
-- **end-of-week-report** — default full report format
-- **verification-before-completion** — automated checks only
-- **receiving-code-review** — auto-assess clarity, escalate true ambiguity
-
-### Deleted files
-
-- `skills/brainstorming/scripts/server.js` — WebSocket server
-- `skills/brainstorming/scripts/helper.js` — client-side JS
-- `skills/brainstorming/scripts/frame-template.html` — HTML frame
-- `skills/brainstorming/visual-companion.md` — visual companion guide
+We're hiring someone to help out full time with Superpowers community and code work. 
+You can read about the job at https://primeradiant.com/jobs/superpowers-community-engineer/
+If this sounds like someone you know, definitely send them our way.
 
 ## Quickstart
 
-Give your agent Superpowers: [Claude Code](#claude-code), [Codex CLI](#codex-cli), [Codex App](#codex-app), [Factory Droid](#factory-droid), [Gemini CLI](#gemini-cli), [OpenCode](#opencode), [Cursor](#cursor), [GitHub Copilot CLI](#github-copilot-cli).
+Give your agent Superpowers: [Claude Code](#claude-code), [Antigravity](#antigravity), [Codex App](#codex-app), [Codex CLI](#codex-cli), [Cursor](#cursor), [Factory Droid](#factory-droid), [GitHub Copilot CLI](#github-copilot-cli), [Kimi Code](#kimi-code), [OpenCode](#opencode), [Pi](#pi).
 
 ## How it works
 
-The agent analyzes the task, generates a design spec, self-reviews it via subagent, creates an implementation plan, then executes it with fresh subagents per task — each going through spec compliance review, code quality review, and automated test verification before proceeding.
+It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
 
-Escalation files in `docs/agent-escalations/` collect anything the agent couldn't resolve autonomously for later human review.
+Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
 
-## Sponsorship
+After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
 
-If Superpowers has helped you do stuff that makes money and you are so inclined, I'd greatly appreciate it if you'd consider [sponsoring my opensource work](https://github.com/sponsors/obra).
+Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for your agent to work autonomously for a couple hours at a time without deviating from the plan you put together.
 
-Thanks!
+There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
 
-- Jesse
+> **On this branch**, the sign-off points above are automated: the agent generates the spec in a single self-reviewed pass, proceeds straight to planning and subagent-driven execution, gates each task on tests + linter, and escalates anything it can't resolve to the `escalation` skill instead of waiting on you.
 
+## Commercial Services
+
+If you're using Superpowers in enterprise and could benefit from commercial support, additional tooling, or managed spending, please don't hesitate to drop us a line at sales@primeradiant.com.
 
 ## Installation
 
@@ -101,6 +84,25 @@ The Superpowers marketplace provides Superpowers and some other related plugins 
   /plugin install superpowers@superpowers-marketplace
   ```
 
+### Antigravity
+
+Install Superpowers as a plugin from this repository:
+
+```bash
+agy plugin install https://github.com/obra/superpowers
+```
+
+Antigravity runs the plugin's session-start hook, so Superpowers is active from
+the first message. Reinstall with the same command to update.
+
+### Codex App
+
+Superpowers is available via the [official Codex plugin marketplace](https://github.com/openai/plugins).
+
+- In the Codex app, click on Plugins in the sidebar.
+- You should see `Superpowers` in the Coding section.
+- Click the `+` next to Superpowers and follow the prompts.
+
 ### Codex CLI
 
 Superpowers is available via the [official Codex plugin marketplace](https://github.com/openai/plugins).
@@ -119,13 +121,15 @@ Superpowers is available via the [official Codex plugin marketplace](https://git
 
 - Select `Install Plugin`.
 
-### Codex App
+### Cursor
 
-Superpowers is available via the [official Codex plugin marketplace](https://github.com/openai/plugins).
+- In Cursor Agent chat, install from marketplace:
 
-- In the Codex app, click on Plugins in the sidebar.
-- You should see `Superpowers` in the Coding section.
-- Click the `+` next to Superpowers and follow the prompts.
+  ```text
+  /add-plugin superpowers
+  ```
+
+- Or search for "superpowers" in the plugin marketplace.
 
 ### Factory Droid
 
@@ -141,19 +145,39 @@ Superpowers is available via the [official Codex plugin marketplace](https://git
   droid plugin install superpowers@superpowers
   ```
 
-### Gemini CLI
+### GitHub Copilot CLI
 
-- Install the extension:
-
-  ```bash
-  gemini extensions install https://github.com/obra/superpowers
-  ```
-
-- Update later:
+- Register the marketplace:
 
   ```bash
-  gemini extensions update superpowers
+  copilot plugin marketplace add obra/superpowers-marketplace
   ```
+
+- Install the plugin:
+
+  ```bash
+  copilot plugin install superpowers@superpowers-marketplace
+  ```
+
+### Kimi Code
+
+Superpowers is available in Kimi Code's plugin marketplace.
+
+- Open Kimi Code's plugin manager:
+
+  ```text
+  /plugins
+  ```
+
+- Go to `Marketplace` > `Superpowers` and install it.
+
+- Or install directly from this repository:
+
+  ```text
+  /plugins install https://github.com/obra/superpowers
+  ```
+
+- Detailed docs: [docs/README.kimi.md](docs/README.kimi.md)
 
 ### OpenCode
 
@@ -168,29 +192,21 @@ already use it in another harness.
 
 - Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)
 
-### Cursor
+### Pi
 
-- In Cursor Agent chat, install from marketplace:
+Install Superpowers as a Pi package from this repository:
 
-  ```text
-  /add-plugin superpowers
-  ```
+```bash
+pi install git:github.com/obra/superpowers
+```
 
-- Or search for "superpowers" in the plugin marketplace.
+For local development, run Pi with this checkout loaded as a temporary package:
 
-### GitHub Copilot CLI
+```bash
+pi -e /path/to/superpowers
+```
 
-- Register the marketplace:
-
-  ```bash
-  copilot plugin marketplace add obra/superpowers-marketplace
-  ```
-
-- Install the plugin:
-
-  ```bash
-  copilot plugin install superpowers@superpowers-marketplace
-  ```
+The Pi package loads the Superpowers skills and a small extension that injects the `using-superpowers` bootstrap at session startup and again after compaction. Pi has native skills, so no compatibility `Skill` tool is required. Subagent and task-list tools remain optional Pi companion packages.
 
 ## The Basic Workflow
 
@@ -254,6 +270,8 @@ The general contribution process for Superpowers is below. Keep in mind that we 
 3. Create a branch for your work
 4. Follow the `writing-skills` skill for creating and testing new and modified skills
 5. Submit a PR, being sure to fill in the pull request template.
+
+Skill-behavior tests use the drill eval harness from [superpowers-evals](https://github.com/prime-radiant-inc/superpowers-evals/), cloned into `evals/` — see `evals/README.md` for setup. Plugin-infrastructure tests live at `tests/` and run via the relevant `run-*.sh` or `npm test`.
 
 See `skills/writing-skills/SKILL.md` for the complete guide.
 

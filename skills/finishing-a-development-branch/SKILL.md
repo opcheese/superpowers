@@ -1,6 +1,6 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: Use when implementation is complete and all tests pass - completes development work by verifying tests and creating a pull request for review (autonomous operation; forge-neutral), then cleaning up
 ---
 
 # Finishing a Development Branch
@@ -24,16 +24,19 @@ Complete development work by verifying tests and creating a PR for review.
 pnpm test / cargo test / pytest / go test ./...
 ```
 
-**If tests fail:**
+**If tests fail:** work is not actually complete. Attempt a fix once; if tests
+still fail, do not create a PR — invoke **superpowers:escalation** to log the
+failing tests with their output, then continue with other independent work.
+
 ```
-Tests failing (<N> failures). Must fix before completing:
+Tests failing (<N> failures) at branch completion:
 
 [Show failures]
 
-Cannot proceed with PR until tests pass.
+Cannot proceed with PR until tests pass — escalated.
 ```
 
-Stop. Don't proceed to Step 2.
+Don't proceed to Step 2 until tests pass.
 
 **If tests pass:** Continue to Step 2.
 
@@ -62,14 +65,22 @@ If on detached HEAD, first create a named branch:
 git checkout -b <feature-branch>
 ```
 
-Then push and open the PR:
+Then push and open the PR/MR. Use whatever forge tooling the project has —
+do NOT assume GitHub. Detect the forge from the remote and use its CLI:
 
 ```bash
 # Push branch
 git push -u origin <feature-branch>
+```
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
+- **GitHub** (`gh` available): `gh pr create --title "<title>" --body "<body>"`
+- **GitLab** (`glab` available): `glab mr create --title "<title>" --description "<body>"`
+- **Otherwise:** push the branch and report the compare/MR URL the push output
+  prints, so a human can open the PR/MR in the web UI.
+
+Use this body template (adapt the field names to the forge):
+
+```
 ## Summary
 <2-3 bullets of what changed>
 
@@ -79,8 +90,6 @@ gh pr create --title "<title>" --body "$(cat <<'EOF'
 ## Automated Verification
 - Tests: <pass/fail with count>
 - Linter: <pass/fail>
-EOF
-)"
 ```
 
 **Do NOT clean up worktree** — it stays alive so a follow-up session can iterate on PR feedback.
@@ -97,7 +106,7 @@ WORKTREE_PATH=$(git rev-parse --show-toplevel)
 
 **If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
 
-**If worktree path is under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`:** Superpowers created this worktree — we own cleanup.
+**If worktree path is under `.worktrees/` or `worktrees/`:** Superpowers created this worktree — we own cleanup.
 
 ```bash
 MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
@@ -128,7 +137,7 @@ git worktree prune  # Self-healing: clean up any stale registrations
 
 **Cleaning up harness-owned worktrees**
 - **Problem:** Removing a worktree the harness created causes phantom state
-- **Fix:** Only clean up worktrees under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`
+- **Fix:** Only clean up worktrees under `.worktrees/` or `worktrees/`
 
 ## Red Flags
 

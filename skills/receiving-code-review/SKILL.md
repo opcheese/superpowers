@@ -27,7 +27,7 @@ WHEN receiving code review feedback:
 ## Forbidden Responses
 
 **NEVER:**
-- "You're absolutely right!" (explicit CLAUDE.md violation)
+- "You're absolutely right!" (explicit instruction-file violation)
 - "Great point!" / "Excellent feedback!" (performative)
 - "Let me implement that now" (before verification)
 
@@ -42,7 +42,7 @@ WHEN receiving code review feedback:
 ```
 IF any item is unclear:
   Assess whether a safe default interpretation exists
-  IF no safe default: Escalate (see escalation skill) with the ambiguous items
+  IF no safe default: Escalate (see superpowers:escalation) with the ambiguous items
   IF safe default exists: Proceed with that interpretation, note the assumption
 
 WHY: Items may be related. Partial understanding = wrong implementation.
@@ -54,7 +54,7 @@ Review says: "Fix 1-6"
 You understand 1,2,3,6. Unclear on 4,5.
 
 ❌ WRONG: Implement 1,2,3,6 now, guess at 4,5
-✅ RIGHT: Implement 1,2,3,6. Escalate 4 and 5 as ambiguous (see escalation skill).
+✅ RIGHT: Implement 1,2,3,6. Escalate 4 and 5 as ambiguous (see superpowers:escalation).
 ```
 
 ## Source-Specific Handling
@@ -78,10 +78,10 @@ IF suggestion seems wrong:
   Push back with technical reasoning
 
 IF can't easily verify:
-  Investigate further. If still uncertain, escalate (see escalation skill)
+  Investigate further. If still uncertain, escalate (see superpowers:escalation)
 
 IF conflicts with prior architectural decisions:
-  Escalate (see escalation skill) with both the suggestion and the conflicting decision
+  Escalate (see superpowers:escalation) with both the suggestion and the conflicting decision
 ```
 
 **the project owner's rule:** "External feedback - be skeptical, but check carefully"
@@ -127,7 +127,7 @@ Push back when:
 - Reference working tests/code
 - Involve the project owner if architectural
 
-**Signal if uncomfortable pushing back out loud:** "Strange things are afoot at the Circle K"
+**If you're uncomfortable pushing back out loud:** Name that tension explicitly and escalate the issue you've seen (see superpowers:escalation).
 
 ## Acknowledging Correct Feedback
 

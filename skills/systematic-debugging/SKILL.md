@@ -208,7 +208,7 @@ You MUST complete each phase before proceeding to the next.
    - Are we "sticking with it through sheer inertia"?
    - Should we refactor architecture vs. continue fixing symptoms?
 
-   **Escalate** (see escalation skill) — log the architectural concern and stop. Do not attempt more fixes on a broken architecture.
+   **Escalate** (see superpowers:escalation) — log the architectural concern and stop. Do not attempt more fixes on a broken architecture.
 
    This is NOT a failed hypothesis - this is a wrong architecture.
 
@@ -234,11 +234,11 @@ If you catch yourself thinking:
 ## Self-Check: Signs You're Doing It Wrong
 
 **Watch for these patterns in your own work:**
-- You assumed without verifying
-- You should have added evidence gathering but didn't
-- You're proposing fixes without understanding root cause
-- You haven't questioned fundamentals, only symptoms
-- You've been cycling through fixes without progress
+- "Is that not happening?" - You assumed without verifying
+- "Will it show us...?" - You should have added evidence gathering
+- "Stop guessing" - You're proposing fixes without understanding
+- "Ultra-think this" - Question fundamentals, not just symptoms
+- "We're stuck?" (frustrated) - Your approach isn't working
 
 **When you notice these:** STOP. Return to Phase 1.
 
