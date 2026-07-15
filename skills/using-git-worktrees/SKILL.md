@@ -105,7 +105,7 @@ Auto-detect and run appropriate setup:
 
 ```bash
 # Node.js
-if [ -f package.json ]; then npm install; fi
+if [ -f package.json ]; then pnpm install; fi
 
 # Rust
 if [ -f Cargo.toml ]; then cargo build; fi
@@ -124,7 +124,7 @@ Run tests to ensure workspace starts clean:
 
 ```bash
 # Use project-appropriate command
-npm test / cargo test / pytest / go test ./...
+pnpm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
