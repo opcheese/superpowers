@@ -9,12 +9,16 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + task review (spec + quality) + broad final review = high quality, fast iteration
+**Core principle:** Fresh subagent per task + task review (spec + quality) + automated verification gate + broad final review = high quality, fast iteration
 
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+
+**Unattended operation:** This fork runs without a human in the loop. Two consequences bind every step below:
+- An **automated verification gate** (see below) — not a human sign-off — is the gate before a task is marked complete. Wherever this skill's examples once showed "demand review by the human," the gate stands in.
+- Wherever this skill says to present a decision to, or escalate to, your human partner — pre-flight plan conflicts, a BLOCKED plan that is itself wrong, a plan-mandated finding — you cannot wait on an answer. Use the **superpowers:escalation** skill instead: log the blocked decision with its context and options, then continue with other independent tasks. Do not guess past a genuine conflict, and do not silently proceed as if it were resolved.
 
 ## When to Use
 
@@ -57,7 +61,10 @@ digraph process {
         "Write diff file, dispatch task reviewer subagent (./task-reviewer-prompt.md)" [shape=box];
         "Task reviewer reports spec ✅ and quality approved?" [shape=diamond];
         "Dispatch fix subagent for Critical/Important findings" [shape=box];
+        "Run automated verification gate (tests + linter)" [shape=box];
+        "Verification passed?" [shape=diamond];
         "Mark task complete in todo list and progress ledger" [shape=box];
+        "Escalate (superpowers:escalation)" [shape=box];
     }
 
     "Read plan, note context and global constraints, create todos" [shape=box];
@@ -74,7 +81,10 @@ digraph process {
     "Write diff file, dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer reports spec ✅ and quality approved?";
     "Task reviewer reports spec ✅ and quality approved?" -> "Dispatch fix subagent for Critical/Important findings" [label="no"];
     "Dispatch fix subagent for Critical/Important findings" -> "Write diff file, dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
-    "Task reviewer reports spec ✅ and quality approved?" -> "Mark task complete in todo list and progress ledger" [label="yes"];
+    "Task reviewer reports spec ✅ and quality approved?" -> "Run automated verification gate (tests + linter)" [label="yes"];
+    "Run automated verification gate (tests + linter)" -> "Verification passed?";
+    "Verification passed?" -> "Mark task complete in todo list and progress ledger" [label="yes"];
+    "Verification passed?" -> "Escalate (superpowers:escalation)" [label="fail after retry"];
     "Mark task complete in todo list and progress ledger" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent (../requesting-code-review/code-reviewer.md)" [label="no"];
@@ -155,6 +165,29 @@ review, but you must resolve each one yourself before marking the task
 complete: you hold the plan and cross-task context the reviewer
 lacks. If you confirm an item is a real gap, treat it as a failed spec
 review — send it back to the implementer and re-review.
+
+## Automated Verification Gate
+
+After the task reviewer approves (spec ✅ and quality approved) and before you
+mark the task complete, run the project's own verification yourself — do not
+rely on the implementer's or reviewer's report for this. In unattended
+operation this gate replaces the human sign-off the interactive flow would ask
+for.
+
+- Run the project's full test command and its linter/type-check (e.g.
+  `pnpm test` and `pnpm lint`, or the project's equivalents). Use the
+  commands the plan or the repo's tooling defines, not assumptions.
+- **Pass:** mark the task complete in the todo list and the progress ledger,
+  then move to the next task.
+- **Fail:** dispatch a fix subagent with the failing output (same as a
+  reviewer finding) and re-run the gate. If it still fails after a fix
+  attempt, do not mark the task complete and do not advance — invoke
+  **superpowers:escalation** to log the blockage with the failing output,
+  then continue with other independent tasks if any remain.
+
+The gate is a controller-run safety net, not a substitute for the implementer
+running tests during TDD or the reviewer's read — it catches integration
+failures that only surface when the whole task's changes run together.
 
 ## Constructing Reviewer Prompts
 
@@ -296,6 +329,8 @@ Implementer: "Got it. Implementing now..."
 Task reviewer: Spec ✅ - all requirements met, nothing extra.
   Strengths: Good test coverage, clean. Issues: None. Task quality: Approved.
 
+[Run automated verification gate — pnpm test + pnpm lint pass]
+
 [Mark Task 1 complete]
 
 Task 2: Recovery modes
@@ -320,6 +355,8 @@ Fixer: Removed --json flag, added progress reporting, extracted PROGRESS_INTERVA
 
 [Task reviewer reviews again]
 Task reviewer: Spec ✅. Task quality: Approved.
+
+[Run automated verification gate — pnpm test + pnpm lint pass]
 
 [Mark Task 2 complete]
 
@@ -385,6 +422,10 @@ Done!
   (`scripts/review-package BASE HEAD`) and name the printed path in the
   prompt
 - Move to next task while the review has open Critical/Important issues
+- Skip the automated verification gate, or mark a task complete while the
+  gate (tests + linter) has not passed
+- Wait indefinitely on a human for a decision — in unattended operation,
+  log it with superpowers:escalation and continue with independent work
 - Re-dispatch a task the progress ledger already marks complete — check
   the ledger (and `git log`) after any compaction or resume
 
