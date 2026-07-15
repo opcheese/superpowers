@@ -1,6 +1,6 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: Use when implementation is complete and all tests pass - completes development work by verifying tests and creating a pull request for review (autonomous operation; forge-neutral), then cleaning up
 ---
 
 # Finishing a Development Branch

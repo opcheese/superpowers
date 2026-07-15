@@ -17,7 +17,7 @@ Create an `agents` branch of superpowers skills adapted for unattended Claude Co
 ## Changes
 
 ### Deleted files
-- `brainstorming/scripts/server.js` — WebSocket server for visual companion
+- `brainstorming/scripts/server.cjs` — WebSocket server for visual companion
 - `brainstorming/scripts/helper.js` — client-side click handling
 - `brainstorming/scripts/frame-template.html` — HTML frame template
 - `brainstorming/visual-companion.md` — visual companion guide

@@ -26,7 +26,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Evaluate 2-3 approaches** — with trade-offs, select the best one with reasoning
 4. **Generate design** — complete design covering architecture, components, data flow, error handling, testing
 5. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+6. **Spec review via subagent** — dispatch the spec-document-reviewer subagent (see below); fix any findings and re-review until it passes
 7. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
@@ -38,15 +38,20 @@ digraph brainstorming {
     "Evaluate approaches" [shape=box];
     "Generate complete design" [shape=box];
     "Write design doc" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
+    "Dispatch spec-document-reviewer subagent" [shape=box];
+    "Review passes?" [shape=diamond];
+    "Fix findings" [shape=box];
     "Invoke writing-plans skill" [shape=doublecircle];
 
     "Explore project context" -> "Analyze requirements";
     "Analyze requirements" -> "Evaluate approaches";
     "Evaluate approaches" -> "Generate complete design";
     "Generate complete design" -> "Write design doc";
-    "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "Invoke writing-plans skill";
+    "Write design doc" -> "Dispatch spec-document-reviewer subagent";
+    "Dispatch spec-document-reviewer subagent" -> "Review passes?";
+    "Review passes?" -> "Fix findings" [label="no"];
+    "Fix findings" -> "Dispatch spec-document-reviewer subagent" [label="re-review"];
+    "Review passes?" -> "Invoke writing-plans skill" [label="yes"];
 }
 ```
 
@@ -95,15 +100,21 @@ digraph brainstorming {
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
-**Spec Self-Review:**
-After writing the spec document, look at it with fresh eyes:
+**Spec Review (via subagent):**
+After writing and committing the spec document, dispatch the spec-document-reviewer
+subagent to validate it — this is the autonomous quality gate that replaces a
+human spec review. Use the template in `spec-document-reviewer-prompt.md`, passing
+the spec file path. The reviewer checks:
 
-1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
-4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+1. **Completeness:** placeholders, "TBD"/"TODO", incomplete sections.
+2. **Internal consistency:** contradictory or conflicting requirements; architecture matching the feature descriptions.
+3. **Scope:** focused enough for a single implementation plan, or needs decomposition.
+4. **Ambiguity:** any requirement open to two interpretations.
 
-Fix any issues inline. No need to re-review — just fix and move on.
+Fix every finding the reviewer returns, then re-dispatch the reviewer. Repeat until
+it passes with no findings. Only then proceed to implementation. If a finding is
+genuinely ambiguous and no safe default exists, escalate (see superpowers:escalation)
+rather than guess.
 
 **Implementation:**
 
