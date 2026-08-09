@@ -9,12 +9,14 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + task review (spec + quality) + broad final review = high quality, fast iteration
+**Core principle:** Fresh subagent per task + task review (spec + quality) + broad final review + human verification = high quality, fast iteration
 
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+
+**Human verification at the end:** Task execution runs continuously, but the work is not done until your human partner has verified it. After the final whole-branch review passes and before finishing the branch, present the completed work to your human partner (what was built, test results, deferred minors, parked findings) and wait for their explicit verification. If they request changes, address them and re-verify. This end-of-run sign-off is required; the per-task reviews and continuous execution do not replace it.
 
 ## When to Use
 
@@ -74,6 +76,7 @@ digraph process {
     "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" [shape=box];
     "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals" [shape=box];
     "Final review clean: delete this plan's workspace" [shape=box];
+    "Present completed work to human for verification" [shape=box];
     "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Setup: worktree, ledger check, read plan, pre-flight review" -> "Dispatch implementer subagent (./implementer-prompt.md)";
@@ -103,7 +106,8 @@ digraph process {
     "More tasks remain?" -> "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" [label="no"];
     "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" -> "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals";
     "Final findings? ONE fix dispatch, one scoped re-review, adjudicate residuals" -> "Final review clean: delete this plan's workspace";
-    "Final review clean: delete this plan's workspace" -> "Use superpowers:finishing-a-development-branch";
+    "Final review clean: delete this plan's workspace" -> "Present completed work to human for verification";
+    "Present completed work to human for verification" -> "Use superpowers:finishing-a-development-branch" [label="human verified"];
 }
 ```
 
@@ -420,7 +424,9 @@ delete this plan's workspace (`rm -rf <workspace>`) — the git history is
 the record now. Sibling directories belong to other plans; leave them
 alone.
 
-Use superpowers:finishing-a-development-branch.
+Then present the completed work to your human partner and wait for their
+explicit verification (see *Human verification at the end*). Only after they
+have verified it, use superpowers:finishing-a-development-branch.
 
 ## Common Rationalizations
 
@@ -434,6 +440,7 @@ Use superpowers:finishing-a-development-branch.
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. Every round ends with a scoped re-review. |
 | "Reviews slow the loop down" | The loop without reviews is just unverified churn. Reviews are the loop's brakes and steering. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
+| "The final review was clean, so the work is verified" | Reviewers read diffs. The end-of-run sign-off is your human partner's, and it is not optional. |
 
 ## Example Workflow
 

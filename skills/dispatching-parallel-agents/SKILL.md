@@ -84,6 +84,11 @@ When agents return:
 - Run full test suite
 - Integrate all changes
 
+### 5. Demand Human Verification
+
+After integration:
+- Present the integrated work to your human partner and wait for explicit approval before considering it done
+
 ## Agent Prompt Structure
 
 Good agent prompts are:
@@ -165,3 +170,4 @@ After agents return:
 2. **Check for conflicts** - Did agents edit same code?
 3. **Run full suite** - Verify all fixes work together
 4. **Spot check** - Agents can make systematic errors
+5. **Demand human verification** - Present work to your human partner and wait for explicit approval before considering done
