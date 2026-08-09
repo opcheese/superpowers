@@ -9,12 +9,27 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + task review (spec + quality) + broad final review = high quality, fast iteration
+**Core principle:** Fresh subagent per task + task review (spec + quality) + automated verification gate + broad final review = high quality, fast iteration
 
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
 **Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+
+**Unattended operation:** This fork runs without a human in the loop. Two
+consequences bind every step below:
+
+- An **automated verification gate** (see *Complete the task*) — not a human
+  sign-off — is the last gate before a task is marked complete.
+- Wherever this skill would present a decision to, or stop for, your human
+  partner — a pre-flight plan conflict, a plan-mandated finding, a
+  load-bearing finding at the breaker, a residual finding after the final
+  review — you cannot wait on an answer. Use the **superpowers:escalation**
+  skill instead: log the blocked decision with its context and options, then
+  continue with other independent tasks. Escalating is not parking: the
+  ledger entry still records the finding and the ruling you could not make.
+  Do not guess past a genuine conflict, and do not silently proceed as if it
+  were resolved.
 
 ## When to Use
 
@@ -57,15 +72,17 @@ digraph process {
         "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" [shape=box];
         "Spec ✅ and quality approved?" [shape=diamond];
         "Finding conflicts with plan text?" [shape=diamond];
-        "Ask human partner which governs" [shape=box];
+        "Escalate (superpowers:escalation): finding beside plan text" [shape=box];
         "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [shape=box];
         "Dispatch scoped re-review (./re-review-prompt.md)" [shape=box];
         "All findings addressed?" [shape=diamond];
         "R = 5?" [shape=diamond];
         "Adjudicate each open finding" [shape=box];
         "Any load-bearing finding?" [shape=diamond];
-        "STOP: report BLOCKED to human partner" [shape=box];
+        "STOP this task: ledger BLOCKED + superpowers:escalation" [shape=box];
         "Park findings in ledger with rulings" [shape=box];
+        "Run automated verification gate (tests + linter)" [shape=box];
+        "Verification passed?" [shape=diamond];
         "Append completion to ledger, mark todo complete" [shape=box];
     }
 
@@ -83,21 +100,25 @@ digraph process {
     "Implementer asks questions?" -> "Implementer implements, tests, commits, self-reviews" [label="no"];
     "Implementer implements, tests, commits, self-reviews" -> "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)";
     "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" -> "Spec ✅ and quality approved?";
-    "Spec ✅ and quality approved?" -> "Append completion to ledger, mark todo complete" [label="yes"];
+    "Spec ✅ and quality approved?" -> "Run automated verification gate (tests + linter)" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
-    "Finding conflicts with plan text?" -> "Ask human partner which governs" [label="yes"];
-    "Ask human partner which governs" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
+    "Finding conflicts with plan text?" -> "Escalate (superpowers:escalation): finding beside plan text" [label="yes"];
+    "Escalate (superpowers:escalation): finding beside plan text" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
     "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no"];
     "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" -> "Dispatch scoped re-review (./re-review-prompt.md)";
     "Dispatch scoped re-review (./re-review-prompt.md)" -> "All findings addressed?";
-    "All findings addressed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
+    "All findings addressed?" -> "Run automated verification gate (tests + linter)" [label="yes"];
     "All findings addressed?" -> "R = 5?" [label="no"];
     "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - next round"];
     "R = 5?" -> "Adjudicate each open finding" [label="yes - breaker trips"];
     "Adjudicate each open finding" -> "Any load-bearing finding?";
-    "Any load-bearing finding?" -> "STOP: report BLOCKED to human partner" [label="yes"];
+    "Any load-bearing finding?" -> "STOP this task: ledger BLOCKED + superpowers:escalation" [label="yes"];
     "Any load-bearing finding?" -> "Park findings in ledger with rulings" [label="no"];
-    "Park findings in ledger with rulings" -> "Append completion to ledger, mark todo complete";
+    "Park findings in ledger with rulings" -> "Run automated verification gate (tests + linter)";
+    "STOP this task: ledger BLOCKED + superpowers:escalation" -> "More tasks remain?" [label="independent tasks only"];
+    "Run automated verification gate (tests + linter)" -> "Verification passed?";
+    "Verification passed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
+    "Verification passed?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - failing output is a finding"];
     "Append completion to ledger, mark todo complete" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" [label="no"];
@@ -111,8 +132,8 @@ digraph process {
 
 Ensure the work happens in an isolated workspace: use
 superpowers:using-git-worktrees to create one or verify the existing one.
-Never start implementation on a main/master branch without your human
-partner's explicit consent.
+Never start implementation on a main/master branch — always work on a
+feature branch. There is no human here to grant an exception.
 
 Conversation memory does not survive compaction. In real sessions,
 controllers that lost their place have re-dispatched entire completed task
@@ -148,11 +169,14 @@ Before dispatching Task 1, scan the plan once for conflicts:
 - anything the plan explicitly mandates that the review rubric treats as a
   defect (a test that asserts nothing, verbatim duplication of a logic block)
 
-Present everything you find to your human partner as one batched question —
-each finding beside the plan text that mandates it, asking which governs —
-before execution begins, not one interrupt per discovery mid-plan. If the
-scan is clean, proceed without comment. The review loop remains the net for
-conflicts that only emerge from implementation.
+If the scan is clean, proceed without comment. If you find conflicts, you
+cannot wait on a human to adjudicate them: log them all at once with
+**superpowers:escalation** before execution begins — each finding beside the
+plan text that mandates it, noting which you believe governs and why — then
+proceed with the tasks the conflict does not block. One batched escalation,
+not one per discovery mid-plan. Do not guess past a genuine conflict on the
+affected task. The review loop remains the net for conflicts that only emerge
+from implementation.
 
 ## Model Selection
 
@@ -245,7 +269,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate to the human
+4. If the plan itself is wrong, escalate via superpowers:escalation and continue with tasks the flaw does not block
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
 
@@ -312,10 +336,12 @@ Before the loop starts, two routes leave it immediately:
   before merge. A roll-up nobody reads is a silent discard. Minor findings
   never enter the loop.
 - A finding labeled plan-mandated — or any finding that conflicts with
-  what the plan's text requires — is the human's decision, like any plan
-  contradiction: present the finding and the plan text, ask which governs.
-  Do not dismiss the finding because the plan mandates it, and do not
-  dispatch a fix that contradicts the plan without asking.
+  what the plan's text requires — is a plan contradiction you cannot resolve
+  unattended: escalate it via superpowers:escalation with the finding beside
+  the plan text and which you believe governs, then let the loop proceed on
+  the findings that do not collide with the plan. Do not dismiss the finding
+  because the plan mandates it, and do not dispatch a fix that contradicts
+  the plan.
 Everything else enters the loop. A fix round is one fix dispatch plus one
 scoped re-review. Five rounds maximum per task:
 
@@ -365,10 +391,12 @@ the cross-task context the reviewer lacks:
 - **Real, but nothing downstream builds on it:** park it the same way, with
   a ruling that says it's real and deferred.
 - **Real and load-bearing** — a later task builds on it, or it reveals a
-  plan defect: STOP. Append `Task <N>: BLOCKED — <reason>` and report to
-  your human partner with the finding, the plan text it collides with, and
-  the fix history. Parking a structural failure lets every dependent task
-  build on it and hands the final review a problem it cannot fix either.
+  plan defect: STOP this task. Append `Task <N>: BLOCKED — <reason>` and
+  invoke superpowers:escalation with the finding, the plan text it collides
+  with, and the fix history; then continue only with tasks that do not build
+  on the broken one. Do not mark the task complete. Parking a structural
+  failure lets every dependent task build on it and hands the final review a
+  problem it cannot fix either.
 
 Adjudicate only at the cap. Adjudicating earlier to end a loop is
 pre-judging with a different name. Every adjudication is a ledger entry —
@@ -376,8 +404,27 @@ a silent discard is forbidden.
 
 ### 5. Complete the task
 
-When the review comes back clean — or every open finding is parked with a
-ruling at the cap — append the completion line to the ledger in the same
+**The automated verification gate.** When the review comes back clean — or
+every open finding is parked with a ruling at the cap — run the project's own
+verification yourself, before any completion line. Do not rely on the
+implementer's or the reviewer's report for this. In unattended operation this
+gate stands where the interactive flow would have a human sign off.
+
+- Run the project's full test command and its linter/type-check (e.g.
+  `pnpm test` and `pnpm lint`, or the project's equivalents). Use the commands
+  the plan or the repo's tooling defines, not assumptions.
+- **Pass:** proceed to the completion line below.
+- **Fail:** the failing output is a finding. Send it into the fix loop as a
+  round like any other (rounds 1-3 resume the implementer), then re-run the
+  gate. If the gate is still red when the five-round cap trips, a broken
+  build is load-bearing by definition: ledger `BLOCKED`, escalate via
+  superpowers:escalation, and do not mark the task complete.
+
+The gate is a controller-run safety net, not a substitute for the implementer
+running tests during TDD or the reviewer's read — it catches integration
+failures that only surface when the whole task's changes run together.
+
+With the gate green, append the completion line to the ledger in the same
 message as your other bookkeeping:
 
 - `Task <N>: complete (commits <base7>..<head7>, review clean)`
@@ -386,7 +433,8 @@ message as your other bookkeeping:
 
 Then mark the todo complete and move on. Never move to the next task while
 the review has open Critical/Important issues that are neither fixed nor
-parked-with-ruling at the cap.
+parked-with-ruling at the cap, and never mark a task complete while the
+verification gate is red.
 
 ## Final Review
 
@@ -410,8 +458,9 @@ Then run exactly one scoped re-review of the fix wave
 [re-review-prompt.md](re-review-prompt.md)).
 Adjudicate any residual findings as in the task loop's breaker: park with
 rulings, or stop on load-bearing ones. There is no second fix wave —
-residual load-bearing findings surface to your human partner when
-finishing-a-development-branch presents the options.
+residual load-bearing findings go to superpowers:escalation and into the
+PR description that finishing-a-development-branch opens, so the reviewer of
+that PR inherits them explicitly rather than by surprise.
 
 ## Finish
 
@@ -434,6 +483,10 @@ Use superpowers:finishing-a-development-branch.
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. Every round ends with a scoped re-review. |
 | "Reviews slow the loop down" | The loop without reviews is just unverified churn. Reviews are the loop's brakes and steering. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
+| "The reviewer approved, the gate is redundant" | The reviewer read a diff; it did not run the suite. The gate catches integration failures no per-task diff shows. |
+| "The implementer said tests pass" | That is the report, not the evidence. Run the suite yourself before the completion line. |
+| "I'll ask the human and pick this up when they answer" | Nobody is there. Escalate with superpowers:escalation and continue with independent work. |
+| "The plan mandates it, so the finding is void" | Neither wins by default. Escalate the collision with both texts; do not fix against the plan and do not discard the finding. |
 
 ## Example Workflow
 
@@ -463,6 +516,7 @@ Implementer: [Later]
 Task reviewer: Spec ✅ - all requirements met, nothing extra.
   Strengths: Good test coverage, clean. Issues: None. Task quality: Approved.
 
+[Verification gate: pnpm test + pnpm lint — green]
 [Ledger: Task 1: complete (commits a1b2c3d..d4e5f6a, review clean)]
 
 Task 2: Recovery modes
@@ -489,6 +543,7 @@ Re-reviewer: Missing progress reporting — ADDRESSED (src/recovery.js:41).
   Verdict: all findings addressed.
 
 [Ledger: Task 2: fix round 1/5 (2 addressed, 0 open; commits d4e5f6a..b7c8d9e)]
+[Verification gate: pnpm test + pnpm lint — green]
 [Ledger: Task 2: complete (commits d4e5f6a..b7c8d9e, review clean)]
 
 ...

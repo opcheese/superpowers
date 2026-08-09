@@ -34,7 +34,7 @@ assert_contains() {
   fi
 }
 
-# Toy project: one top-level test, one nested test. A stubbed `npm` on PATH
+# Toy project: one top-level test, one nested test. A stubbed `pnpm` on PATH
 # creates the pollution marker whenever any test runs, so the first test file
 # executed is always identified as the polluter.
 setup_project() {
@@ -43,15 +43,15 @@ setup_project() {
   mkdir -p "$PROJECT/src/feature" "$PROJECT/bin"
   echo "test('top')" > "$PROJECT/src/top.test.ts"
   echo "test('nested')" > "$PROJECT/src/feature/nested.test.ts"
-  cat > "$PROJECT/bin/npm" <<'EOF'
+  cat > "$PROJECT/bin/pnpm" <<'EOF'
 #!/usr/bin/env bash
 touch pollution.marker
 EOF
-  chmod +x "$PROJECT/bin/npm"
+  chmod +x "$PROJECT/bin/pnpm"
 }
 
 # run_polluter <pattern> — runs the script in the toy project with the stub
-# npm first on PATH; captures combined output, never aborts on exit code.
+# pnpm first on PATH; captures combined output, never aborts on exit code.
 run_polluter() {
   local pattern="$1"
   rm -f "$PROJECT/pollution.marker"

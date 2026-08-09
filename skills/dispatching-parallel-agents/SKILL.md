@@ -84,6 +84,14 @@ When agents return:
 - Run full test suite
 - Integrate all changes
 
+### 5. Automated Verification
+
+After integration:
+- Run the full test suite
+- Run linter if configured
+- If both pass, proceed
+- If either fails, dispatch a fix subagent once. If still failing, escalate (see superpowers:escalation)
+
 ## Agent Prompt Structure
 
 Good agent prompts are:
@@ -165,3 +173,4 @@ After agents return:
 2. **Check for conflicts** - Did agents edit same code?
 3. **Run full suite** - Verify all fixes work together
 4. **Spot check** - Agents can make systematic errors
+5. **Automated verification** - Run full test suite and linter. If failures, dispatch fix subagent. If still failing, escalate (see superpowers:escalation).

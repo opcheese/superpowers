@@ -1,7 +1,29 @@
-# Superpowers
+# Superpowers — Agents Branch
+
+> **This is the `agents` branch** — a fork adapted for unattended coding sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. Synced to upstream **v6.2.0**. For the interactive upstream version with human oversight, see [obra/superpowers](https://github.com/obra/superpowers).
 
 Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.
 
+## What's different on this branch
+
+This fork removes human-oversight gates and interactive prompts, replacing them with **automated verification** and an **escalation** pattern suitable for autonomous operation. It tracks upstream and re-applies these changes on each sync.
+
+| Area | upstream (interactive) | `agents` (autonomous) |
+|------|------------------------|-----------------------|
+| **Quality gates** | Reviewer verdicts + human sign-off | Same reviewer flow **plus** a controller-run automated verification gate (tests + linter); escalate on failure |
+| **Brainstorming** | Interactive Q&A + visual companion | Single-pass design generation with self-review via subagent (no companion) |
+| **Finishing work** | Present merge/PR/keep menu | Always create a PR (forge-neutral: `gh`/`glab`), safest default for unattended work |
+| **Ambiguity / blockers** | Ask the human | Escalate via the `escalation` skill and continue with independent tasks |
+| **Worktrees** | Ask for consent + directory | Auto-select `.worktrees/`, no consent prompt |
+| **Debugging** | Discuss with human after repeated failures | Escalate and stop |
+| **Package manager** | `npm` in examples | `pnpm` |
+
+### Fork-only skills
+
+- **escalation** — logs a blocked decision with its context and options, then continues with independent work
+- **documentation-hygiene** — frontmatter/status discipline for docs that agents and humans both read
+- **end-of-day-report** / **end-of-week-report** — git-driven activity summaries (author-filtered for multi-author repos)
+- **topic-research** — multi-source technical research with citations
 
 ## Quickstart
 
@@ -18,6 +40,8 @@ After you've signed off on the design, your agent puts together an implementatio
 Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for your agent to work autonomously for a couple hours at a time without deviating from the plan you put together.
 
 There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
+
+> **On this branch**, the sign-off points above are automated: the agent generates the spec in a single self-reviewed pass, proceeds straight to planning and subagent-driven execution, gates each task on tests + linter, and escalates anything it can't resolve to the `escalation` skill instead of waiting on you.
 
 ## Commercial Services
 
@@ -267,10 +291,6 @@ Superpowers updates are somewhat coding-agent dependent, but are often automatic
 ## License
 
 MIT License - see LICENSE file for details
-
-## Visual companion telemetry
-
-Because skills and plugins don't provide any feedback to creators, we have no idea how many of you are using Superpowers. By default, the Prime Radiant logo on brainstorming's optional visual companion feature is loaded from our website. It includes the version of Superpowers in use. It does not include any details about your project, prompt, or coding agent. We don't see your clicks or anything about what you're building. This helps us have a rough idea of how many folks are using Superpowers and which version of Superpowers they're using. It's 100% optional. To disable this, set the environment variable `SUPERPOWERS_DISABLE_TELEMETRY` to any true value. Superpowers also honors Claude Code's `DISABLE_TELEMETRY` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` opt-outs.
 
 ## Community
 

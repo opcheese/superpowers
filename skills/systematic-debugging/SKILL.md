@@ -207,7 +207,7 @@ You MUST complete each phase before proceeding to the next.
    - Are we "sticking with it through sheer inertia"?
    - Should we refactor architecture vs. continue fixing symptoms?
 
-   **Discuss with your human partner before attempting more fixes**
+   **Escalate** (see superpowers:escalation) — log the architectural concern and stop. Do not attempt more fixes on a broken architecture.
 
    This is NOT a failed hypothesis - this is a wrong architecture.
 
@@ -230,16 +230,16 @@ If you catch yourself thinking:
 
 **If 3+ fixes failed:** Question the architecture (see Phase 4.5)
 
-## your human partner's Signals You're Doing It Wrong
+## Self-Check: Signs You're Doing It Wrong
 
-**Watch for these redirections:**
+**Watch for these patterns in your own work:**
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
 - "Ultra-think this" - Question fundamentals, not just symptoms
 - "We're stuck?" (frustrated) - Your approach isn't working
 
-**When you see these:** STOP. Return to Phase 1.
+**When you notice these:** STOP. Return to Phase 1.
 
 ## Common Rationalizations
 
