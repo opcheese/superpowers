@@ -30,7 +30,32 @@ For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Mark as completed
+4. Commit, then run the native-review checkpoint below
+5. Mark as completed
+
+**Native-review checkpoint (every task, before marking it completed).** Ask
+your human partner to run the native reviewer over what this task changed:
+
+```
+Task <N> (<one-line description>) is done and verified: <base7>..<head7>.
+Please run:  /code-review high <base7>..<head7>
+Paste anything it finds and I'll fix it before moving on. Reply "skip" to
+waive review for this task, or "waive run" to waive it for the rest of
+this run.
+```
+
+Then wait. This is a gate, not a notification, and it is the one place you
+stop between tasks.
+
+**Why this and nothing else interrupts them:** `/code-review` is marked
+`disable-model-invocation` — you cannot invoke it, and it cannot be preloaded
+into a subagent. Your human partner typing it is the only path to the
+strongest reviewer available. That is a request for work no one else can do,
+which is what separates it from a "should I continue?" ping.
+
+Findings go back into the task before you mark it completed. A waiver is
+explicit — "skip" or "waive run" — never inferred from silence, and it is
+noted in your report at the end.
 
 ### Step 3: Demand Human Verification
 

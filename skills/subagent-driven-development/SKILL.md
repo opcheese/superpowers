@@ -14,9 +14,11 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, all tasks complete, or the native-review checkpoint below. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
-**Human verification at the end:** Task execution runs continuously, but the work is not done until your human partner has verified it. After the final whole-branch review passes and before finishing the branch, present the completed work to your human partner (what was built, test results, deferred minors, parked findings) and wait for their explicit verification. If they request changes, address them and re-verify. This end-of-run sign-off is required; the per-task reviews and continuous execution do not replace it.
+**The native-review checkpoint is the one exception, and it is not a progress ping.** At each task boundary you stop for a specific reason: the strongest reviewer available is one you cannot run. `/code-review` is marked `disable-model-invocation` — you cannot invoke it, it cannot be preloaded into a subagent, and it will not fire from a scheduled task. Your human partner typing it is the *only* path to that reviewer. Asking them to run it is a request for work no one else in this loop can do, which is exactly what distinguishes it from "should I continue?" See *Native review at each task boundary*.
+
+**Human verification at the end:** Task execution runs continuously, but the work is not done until your human partner has verified it. After the final whole-branch review passes and before finishing the branch, present the completed work to your human partner (what was built, test results, deferred minors, parked findings) and wait for their explicit verification. If they request changes, address them and re-verify. This end-of-run sign-off is required; the per-task reviews and the per-task native-review checkpoint do not replace it.
 
 ## When to Use
 
@@ -68,6 +70,8 @@ digraph process {
         "Any load-bearing finding?" [shape=diamond];
         "STOP: report BLOCKED to human partner" [shape=box];
         "Park findings in ledger with rulings" [shape=box];
+        "Ask human partner to run /code-review over the task range" [shape=box];
+        "Native findings returned?" [shape=diamond];
         "Append completion to ledger, mark todo complete" [shape=box];
     }
 
@@ -86,21 +90,24 @@ digraph process {
     "Implementer asks questions?" -> "Implementer implements, tests, commits, self-reviews" [label="no"];
     "Implementer implements, tests, commits, self-reviews" -> "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)";
     "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" -> "Spec ✅ and quality approved?";
-    "Spec ✅ and quality approved?" -> "Append completion to ledger, mark todo complete" [label="yes"];
+    "Spec ✅ and quality approved?" -> "Ask human partner to run /code-review over the task range" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
     "Finding conflicts with plan text?" -> "Ask human partner which governs" [label="yes"];
     "Ask human partner which governs" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
     "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no"];
     "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" -> "Dispatch scoped re-review (./re-review-prompt.md)";
     "Dispatch scoped re-review (./re-review-prompt.md)" -> "All findings addressed?";
-    "All findings addressed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
+    "All findings addressed?" -> "Ask human partner to run /code-review over the task range" [label="yes"];
     "All findings addressed?" -> "R = 5?" [label="no"];
     "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - next round"];
     "R = 5?" -> "Adjudicate each open finding" [label="yes - breaker trips"];
     "Adjudicate each open finding" -> "Any load-bearing finding?";
     "Any load-bearing finding?" -> "STOP: report BLOCKED to human partner" [label="yes"];
     "Any load-bearing finding?" -> "Park findings in ledger with rulings" [label="no"];
-    "Park findings in ledger with rulings" -> "Append completion to ledger, mark todo complete";
+    "Park findings in ledger with rulings" -> "Ask human partner to run /code-review over the task range";
+    "Ask human partner to run /code-review over the task range" -> "Native findings returned?";
+    "Native findings returned?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="yes"];
+    "Native findings returned?" -> "Append completion to ledger, mark todo complete" [label="no - clean or waived"];
     "Append completion to ledger, mark todo complete" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer (../requesting-code-review/code-reviewer.md)" [label="no"];
@@ -378,19 +385,55 @@ Adjudicate only at the cap. Adjudicating earlier to end a loop is
 pre-judging with a different name. Every adjudication is a ledger entry —
 a silent discard is forbidden.
 
-### 5. Complete the task
+### 5. Native review at each task boundary
 
 When the review comes back clean — or every open finding is parked with a
-ruling at the cap — append the completion line to the ledger in the same
-message as your other bookkeeping:
+ruling at the cap — stop and ask your human partner to run the native
+reviewer over this task's range before you write the completion line:
 
-- `Task <N>: complete (commits <base7>..<head7>, review clean)`
-- `Task <N>: complete (commits <base7>..<head7>, <K> parked)` after a
-  tripped breaker
+```
+Task <N> (<one-line description>) is reviewed clean: <base7>..<head7>.
+Please run:  /code-review high <base7>..<head7>
+Paste anything it finds and I'll route it into the fix loop. Reply "skip"
+to waive review for this task, or "waive run" to waive it for the rest of
+this run.
+```
+
+**Prefer the native reviewer over your own.** It fans out across specialised
+agents and runs a separate verification pass whose only job is killing false
+positives; the task reviewer you dispatched has no such stage. Your reviewer
+is the spec-compliance and task-quality gate — the thing native will not do,
+because it reviews a diff and has no idea what the plan required. The two are
+complementary, and this checkpoint is where the second one gets run.
+
+Then handle the answer:
+
+- **Findings returned:** they enter the fix loop exactly like reviewer
+  findings, at the current round number. Re-run this checkpoint after the
+  fix round closes.
+- **Clean:** note it and continue.
+- **"skip" / "waive run":** record it —
+  `Task <N>: native review waived (<scope>)` — and continue. A waiver is your
+  human partner's to give; never take it on their behalf, and never infer one
+  from silence.
+- **No answer yet:** wait. This is a gate, not a notification.
+
+Record the outcome on the completion line below.
+
+### 6. Complete the task
+
+With the checkpoint resolved, append the completion line to the ledger in the
+same message as your other bookkeeping:
+
+- `Task <N>: complete (commits <base7>..<head7>, review clean, native clean)`
+- `Task <N>: complete (commits <base7>..<head7>, review clean, native waived)`
+- `Task <N>: complete (commits <base7>..<head7>, <K> parked, native clean)`
+  after a tripped breaker
 
 Then mark the todo complete and move on. Never move to the next task while
 the review has open Critical/Important issues that are neither fixed nor
-parked-with-ruling at the cap.
+parked-with-ruling at the cap, and never while the native-review checkpoint
+is unanswered.
 
 ## Final Review
 
@@ -398,7 +441,12 @@ The final whole-branch review gets a package too: run
 `scripts/review-package PLAN_FILE MERGE_BASE HEAD` (MERGE_BASE = the commit the
 branch started from, e.g. `git merge-base main HEAD`) and include the
 printed path in the final review dispatch, so the final reviewer reads
-one file instead of re-deriving the branch diff with git commands. Dispatch
+one file instead of re-deriving the branch diff with git commands. Before dispatching it, ask your human partner to run the native reviewer over
+the whole branch — `/code-review high <merge-base>..HEAD`, or `/code-review
+ultra` if the branch is large and the run warrants the cost. This is the
+checkpoint's whole-branch counterpart and the point where the native reviewer
+is most valuable: it sees cross-task interactions no per-task review covered.
+Route anything it finds into the final fix wave. Then dispatch our reviewer
 on the most capable available model (see Model Selection), using
 superpowers:requesting-code-review's
 [code-reviewer.md](../requesting-code-review/code-reviewer.md). Point it at
@@ -440,6 +488,12 @@ have verified it, use superpowers:finishing-a-development-branch.
 | "The fix was small, skip the re-review" | Unreviewed fixes are how regressions land. Every round ends with a scoped re-review. |
 | "Reviews slow the loop down" | The loop without reviews is just unverified churn. Reviews are the loop's brakes and steering. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
+| "The final review was clean, so the work is verified" | Reviewers read diffs. The end-of-run sign-off is your human partner's, and it is not optional. |
+| "Continuous execution says don't interrupt them" | It carves out this checkpoint by name. Continuous execution bans status pings, not gates. |
+| "A per-task checkpoint is a fake checkpoint that trains rubber-stamping" | A fake checkpoint asks for a decision already made. This asks them to run a reviewer you are structurally unable to run. |
+| "They're busy — I'll batch the review requests at the end" | Batched findings land on code three tasks deep, and the fix touches work already built on. Per-task is why the range is small. |
+| "They didn't answer, so they're fine with it" | Silence is not a waiver. Waivers are explicit and go in the ledger. |
+| "My task reviewer already approved it, native would be redundant" | Your reviewer has no false-positive verification stage and native has no idea what the plan required. Neither substitutes for the other. |
 | "The final review was clean, so the work is verified" | Reviewers read diffs. The end-of-run sign-off is your human partner's, and it is not optional. |
 
 ## Example Workflow
