@@ -1,31 +1,26 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete and all tests pass - completes development work by verifying tests and creating a pull request for review (autonomous operation; forge-neutral), then cleaning up
+description: Use when implementation is complete, all tests pass, and you need to integrate the work — autonomous operation always opens a pull request for later human review
 ---
 
 # Finishing a Development Branch
 
 ## Overview
 
-Complete development work by verifying tests and creating a PR for review.
+**Core principle:** Verify tests → Detect environment → Open a PR → Clean up.
 
-**Core principle:** Verify tests → Detect environment → Create PR → Clean up.
+This fork runs unattended. There is no integration menu and no one to answer
+it: the safe default for autonomous work is always a pull request, never a
+local merge. A human reviews and merges later.
 
 **Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
-## The Process
+## Step 1: Verify Tests
 
-### Step 1: Verify Tests
+Run the project's full test suite (`pnpm test` / `cargo test` / `pytest` / `go test ./...`).
 
-**Before pushing, verify tests pass:**
-
-```bash
-# Run project's test suite
-pnpm test / cargo test / pytest / go test ./...
-```
-
-**If tests fail:** work is not actually complete. Attempt a fix once; if tests
-still fail, do not create a PR — invoke **superpowers:escalation** to log the
+**If tests fail:** the work is not complete. Attempt a fix once; if the suite
+is still red, do not open a PR — invoke **superpowers:escalation** to log the
 failing tests with their output, then continue with other independent work.
 
 ```
@@ -33,52 +28,72 @@ Tests failing (<N> failures) at branch completion:
 
 [Show failures]
 
-Cannot proceed with PR until tests pass — escalated.
+Cannot open a PR until tests pass — escalated.
 ```
 
-Don't proceed to Step 2 until tests pass.
+**If tests pass:** continue to Step 2.
 
-**If tests pass:** Continue to Step 2.
-
-### Step 2: Detect Environment
-
-**Determine workspace state before pushing:**
+## Step 2: Detect Environment
 
 ```bash
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+# Capture now, while still inside the workspace — later steps may change
+# directory before cleanup needs this value
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
 ```
 
-| State | Cleanup |
-|-------|---------|
-| `GIT_DIR == GIT_COMMON` (normal repo) | No worktree to clean up |
-| `GIT_DIR != GIT_COMMON`, named branch | Provenance-based (see Step 4) |
-| `GIT_DIR != GIT_COMMON`, detached HEAD | No cleanup (externally managed); push as new branch |
+| State | Push | Cleanup |
+|-------|------|---------|
+| `GIT_DIR == GIT_COMMON` (normal repo) | Push the current branch | No worktree to clean up |
+| `GIT_DIR != GIT_COMMON`, named branch | Push the current branch | Preserved for PR iteration |
+| `GIT_DIR != GIT_COMMON`, detached HEAD | Name a branch first, then push | Externally managed — leave in place |
 
-### Step 3: Push and Create PR
+## Step 3: Determine Base Branch
 
-For autonomous agents, always create a PR (never merge directly — a human can review later).
+The base branch is whatever this work forked from — usually named in the
+plan, the conversation, or the branch's upstream. Resolve it from evidence,
+in this order, rather than asking:
 
-If on detached HEAD, first create a named branch:
+```bash
+git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null   # tracking branch
+git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null      # remote default branch
+```
+
+Opening a PR against the wrong base is cheap to correct and visible in the
+PR itself — unlike a wrong merge. If the evidence genuinely conflicts, pick
+the remote's default branch, say which base you chose and why in the PR
+description, and escalate the ambiguity (see superpowers:escalation).
+
+## Step 4: Push and Open the PR
+
+Always open a PR. Never merge locally in unattended operation — the PR *is*
+the review gate that a human would otherwise have provided.
+
+If on a detached HEAD, name a branch first:
 
 ```bash
 git checkout -b <feature-branch>
 ```
 
-Then push and open the PR/MR. Use whatever forge tooling the project has —
-do NOT assume GitHub. Detect the forge from the remote and use its CLI:
+Then push:
 
 ```bash
-# Push branch
 git push -u origin <feature-branch>
+# From a detached HEAD you did not name locally:
+# git push origin HEAD:refs/heads/<new-branch>
 ```
 
-- **GitHub** (`gh` available): `gh pr create --title "<title>" --body "<body>"`
-- **GitLab** (`glab` available): `glab mr create --title "<title>" --description "<body>"`
-- **Otherwise:** push the branch and report the compare/MR URL the push output
-  prints, so a human can open the PR/MR in the web UI.
+Open the pull/merge request against the base branch with the forge's own
+tooling — do **not** assume GitHub. Detect the forge from the remote:
 
-Use this body template (adapt the field names to the forge):
+- **GitHub** (`gh` available): `gh pr create --base <base> --title "<title>" --body "<body>"`
+- **GitLab** (`glab` available): `glab mr create --target-branch <base> --title "<title>" --description "<body>"`
+- **Otherwise:** the push output prints a compare/MR creation URL — report
+  that URL so a human can open it in the web UI.
+
+Follow the repo's PR template and conventions if present. Otherwise use this
+body, adapting field names to the forge:
 
 ```
 ## Summary
@@ -90,76 +105,72 @@ Use this body template (adapt the field names to the forge):
 ## Automated Verification
 - Tests: <pass/fail with count>
 - Linter: <pass/fail>
+
+## Open items
+<parked findings, escalations, and residual review findings — or "none">
 ```
 
-**Do NOT clean up worktree** — it stays alive so a follow-up session can iterate on PR feedback.
+Carry any parked findings, escalations, and residual final-review findings
+into that last section. An unattended run's PR is the only place a human
+learns what the loop could not resolve; a finding that lives only in a
+deleted workspace ledger is a silent discard.
 
-### Step 4: Cleanup Workspace (only if PR creation failed or work is being discarded)
+Report the PR/MR URL.
 
-**For successful PR creation, skip this step** — preserve the worktree.
+**Keep the worktree** — follow-up sessions iterate on PR feedback there.
 
-```bash
-GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
-GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-WORKTREE_PATH=$(git rev-parse --show-toplevel)
-```
+## Step 5: Cleanup Workspace
 
-**If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
+Cleanup runs only when the PR could not be opened and the branch is being
+abandoned. A successful PR always preserves the worktree.
 
-**If worktree path is under `.worktrees/` or `worktrees/`:** Superpowers created this worktree — we own cleanup.
+Run from the main repo root — worktree removal fails from inside the
+worktree — using the values captured in Step 2:
 
 ```bash
 MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
 cd "$MAIN_ROOT"
+```
+
+**If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
+
+**If `WORKTREE_PATH` is under `.worktrees/` or `worktrees/`:** Superpowers
+created this worktree — we own cleanup:
+
+```bash
 git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clean up any stale registrations
 ```
 
-**Otherwise:** The host environment (harness) owns this workspace. Do NOT remove it. If your platform provides a workspace-exit tool, use it. Otherwise, leave the workspace in place.
+**Otherwise:** The host environment owns this workspace — leave it in place.
+If your platform provides a workspace-exit tool, use it.
 
-## Common Mistakes
+## Quick Reference
 
-**Skipping test verification**
-- **Problem:** Create failing PR
-- **Fix:** Always verify tests before creating PR
+| Situation | Merge | Push | Open PR | Keep Worktree |
+|-----------|-------|------|---------|---------------|
+| Tests green | - | yes | yes | yes |
+| Tests red after one fix attempt | - | - | - | yes (escalate) |
+| PR creation failed | - | yes | report URL | yes |
 
-**Merging directly**
-- **Problem:** No review opportunity for unattended work
-- **Fix:** Always create PR — let a human review later
+## Common Rationalizations
 
-**Cleaning up worktree after PR**
-- **Problem:** Remove worktree needed for PR iteration
-- **Fix:** Preserve worktree once PR is open
-
-**Running git worktree remove from inside the worktree**
-- **Problem:** Command fails silently when CWD is inside the worktree being removed
-- **Fix:** Always `cd` to main repo root before `git worktree remove`
-
-**Cleaning up harness-owned worktrees**
-- **Problem:** Removing a worktree the harness created causes phantom state
-- **Fix:** Only clean up worktrees under `.worktrees/` or `worktrees/`
-
-## Red Flags
-
-**Never:**
-- Proceed with failing tests
-- Merge directly without a PR (in autonomous mode)
-- Force-push without prior authorization
-- Clean up worktrees you didn't create (provenance check)
-- Run `git worktree remove` from inside the worktree
-
-**Always:**
-- Verify tests before pushing
-- Detect environment before pushing
-- Create a PR (never merge locally)
-- `cd` to main repo root before worktree removal
-- Run `git worktree prune` after removal
+| Excuse | Reality |
+|--------|---------|
+| "Tests passed earlier this session" | Run the suite on the tree you are about to push. A green run only proves the tree it ran on. |
+| "Nobody is watching, merging is faster" | The PR is the review gate that replaces the human sign-off. Unattended work never merges itself. |
+| "The change is trivial, it can go straight to the base branch" | Triviality is a claim no reviewer got to check. Open the PR. |
+| "The PR is up, so the worktree is clutter now" | PR feedback gets fixed in that worktree. It stays until the work lands. |
+| "This other worktree looks stale — I'll clean it too" | Clean up only worktrees under `.worktrees/` or `worktrees/`. Everything else belongs to the host. |
+| "The base branch is obviously main" | Resolve it from the tracking branch or the remote's default, and say which you chose in the PR. |
+| "The push was rejected — force-push will fix it" | A rejected push means the remote moved. Investigate and rebase; never force-push unattended. |
+| "The parked findings are in the ledger, that's enough" | The workspace is deleted at the end of the plan. Findings that matter go in the PR description. |
 
 ## Integration
 
 **Called by:**
-- **subagent-driven-development** (Step 7) - After all tasks complete
-- **executing-plans** (Step 5) - After all batches complete
+- **subagent-driven-development** — after the final whole-branch review is clean
+- **executing-plans** — after all tasks complete and verification passes
 
 **Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
+- **using-git-worktrees** — cleans up the worktree created by that skill

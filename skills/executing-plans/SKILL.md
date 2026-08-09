@@ -13,15 +13,16 @@ Load plan, review critically, execute all tasks, run automated verification befo
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** If subagents are available, use superpowers:subagent-driven-development instead of this skill for higher quality output.
+**Note:** Superpowers works much better with access to subagents (Claude Code, Codex CLI, Codex App, Copilot CLI, and Gemini CLI all qualify; see the per-platform tool refs in `../using-superpowers/references/`). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
 
 ## The Process
 
 ### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns that block execution: Escalate (see escalation skill)
-4. If no concerns: Create TodoWrite and proceed
+1. Ensure an isolated workspace: use superpowers:using-git-worktrees to create one or verify the existing one
+2. Read plan file
+3. Review critically - identify any questions or concerns about the plan
+4. If concerns that block execution: Escalate (see superpowers:escalation) and continue with what is not blocked
+5. If no concerns: Create todos for the plan items and proceed
 
 ### Step 2: Execute Tasks
 
@@ -32,12 +33,16 @@ For each task:
 4. Mark as completed
 
 ### Step 3: Automated Verification
-When all tasks complete:
+
+When all tasks are complete:
 - Run the full test suite
-- Run linter if configured
+- Run the linter/type-check if configured
 - Verify all plan requirements are met (line-by-line checklist)
 - If all pass, proceed to completion
-- If any fail, attempt fix once. If still failing, escalate (see escalation skill)
+- If any fail, attempt a fix once. If still failing, escalate (see superpowers:escalation)
+
+In unattended operation this gate stands where the interactive flow would ask a
+human to sign off. Never finalize on a report of passing tests — run them.
 
 ### Step 4: Complete Development
 
@@ -48,13 +53,14 @@ After all tasks complete and verified:
 
 ## When to Escalate
 
-**Escalate (see escalation skill) when:**
+**Escalate (see superpowers:escalation) when:**
 - Hit a blocker (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
 - Verification fails after one retry
 
-Continue with other independent tasks if any remain.
+Log it and continue with other independent tasks if any remain. Do not guess
+past a genuine blocker, and do not wait on an answer that is not coming.
 
 ## Remember
 - Review plan critically first
@@ -62,12 +68,5 @@ Continue with other independent tasks if any remain.
 - Don't skip verifications
 - Reference skills when plan says to
 - Run automated verification before completing — never finalize without test evidence
-- When blocked, escalate (see escalation skill) and continue with independent tasks
+- When blocked, escalate and continue with independent tasks
 - Never start implementation on main/master branch — always use a feature branch
-
-## Integration
-
-**Required workflow skills:**
-- **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks

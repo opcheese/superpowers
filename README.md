@@ -1,6 +1,6 @@
 # Superpowers — Agents Branch
 
-> **This is the `agents` branch** — a fork adapted for unattended coding sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. Synced to upstream **v6.1.1**. For the interactive upstream version with human oversight, see [obra/superpowers](https://github.com/obra/superpowers).
+> **This is the `agents` branch** — a fork adapted for unattended coding sessions (`claude -p` in CI/pipelines/cron). No human-in-the-loop required. Synced to upstream **v6.2.0**. For the interactive upstream version with human oversight, see [obra/superpowers](https://github.com/obra/superpowers).
 
 Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.
 
@@ -12,7 +12,7 @@ This fork removes human-oversight gates and interactive prompts, replacing them 
 |------|------------------------|-----------------------|
 | **Quality gates** | Reviewer verdicts + human sign-off | Same reviewer flow **plus** a controller-run automated verification gate (tests + linter); escalate on failure |
 | **Brainstorming** | Interactive Q&A + visual companion | Single-pass design generation with self-review via subagent (no companion) |
-| **Finishing work** | Present merge/PR/keep/discard menu | Always create a PR (forge-neutral: `gh`/`glab`), safest default for unattended work |
+| **Finishing work** | Present merge/PR/keep menu | Always create a PR (forge-neutral: `gh`/`glab`), safest default for unattended work |
 | **Ambiguity / blockers** | Ask the human | Escalate via the `escalation` skill and continue with independent tasks |
 | **Worktrees** | Ask for consent + directory | Auto-select `.worktrees/`, no consent prompt |
 | **Debugging** | Discuss with human after repeated failures | Escalate and stop |
@@ -21,18 +21,13 @@ This fork removes human-oversight gates and interactive prompts, replacing them 
 ### Fork-only skills
 
 - **escalation** — logs a blocked decision with its context and options, then continues with independent work
+- **documentation-hygiene** — frontmatter/status discipline for docs that agents and humans both read
 - **end-of-day-report** / **end-of-week-report** — git-driven activity summaries (author-filtered for multi-author repos)
 - **topic-research** — multi-source technical research with citations
 
-## We're Hiring!
-
-We're hiring someone to help out full time with Superpowers community and code work. 
-You can read about the job at https://primeradiant.com/jobs/superpowers-community-engineer/
-If this sounds like someone you know, definitely send them our way.
-
 ## Quickstart
 
-Give your agent Superpowers: [Claude Code](#claude-code), [Antigravity](#antigravity), [Codex App](#codex-app), [Codex CLI](#codex-cli), [Cursor](#cursor), [Factory Droid](#factory-droid), [GitHub Copilot CLI](#github-copilot-cli), [Kimi Code](#kimi-code), [OpenCode](#opencode), [Pi](#pi).
+Give your agent Superpowers: [Claude Code](#claude-code), [Antigravity](#antigravity), [Codex App](#codex-app), [Codex CLI](#codex-cli), [Cursor](#cursor), [Factory Droid](#factory-droid), [Gemini CLI](#gemini-cli), [GitHub Copilot CLI](#github-copilot-cli), [Kimi Code](#kimi-code), [OpenCode](#opencode), [Pi](#pi).
 
 ## How it works
 
@@ -143,6 +138,20 @@ Superpowers is available via the [official Codex plugin marketplace](https://git
 
   ```bash
   droid plugin install superpowers@superpowers
+  ```
+
+### Gemini CLI
+
+- Install the extension:
+
+  ```bash
+  gemini extensions install https://github.com/obra/superpowers
+  ```
+
+- Update later:
+
+  ```bash
+  gemini extensions update superpowers
   ```
 
 ### GitHub Copilot CLI

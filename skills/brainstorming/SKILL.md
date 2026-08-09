@@ -71,6 +71,7 @@ digraph brainstorming {
 - Evaluate 2-3 different approaches with trade-offs
 - Select the best approach with clear reasoning
 - Lead with the recommended option and explain why
+- YAGNI ruthlessly - remove unnecessary features from every approach and design
 
 **Generating the design:**
 
@@ -120,10 +121,3 @@ rather than guess.
 
 - Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
-
-## Key Principles
-
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always evaluate 2-3 approaches before settling
-- **Self-review** - Use spec-document-reviewer subagent to validate design quality
-- **Escalate ambiguity** - If requirements are unclear and no safe default exists, escalate rather than guess
