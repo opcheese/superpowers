@@ -87,7 +87,7 @@ own built-in `/code-review`. On `main`, whose whole per-task checkpoint rests
 on the human typing that command and getting the native multi-agent
 reviewer, that ambiguity is not cosmetic.
 
-### Filter 4 — Setup coupling and carrying cost
+### Filter 4 — Setup coupling and carrying cost, and *where* you vendor
 
 Two costs, both recurring:
 
@@ -95,10 +95,21 @@ Two costs, both recurring:
   `docs/agents/issue-tracker.md`, an ADR directory — before it works? This
   pack's engineering flow does; several skills fail closed and tell the user
   to run `/setup-matt-pocock-skills`.
-- **Per-sync carrying cost.** *Vendoring* a skill into this fork means
-  re-applying it across every upstream sync forever. *Installing alongside*
-  as its own plugin costs nothing at sync time — but pays the Filter 3 tax
-  at runtime instead. The choice is where you want to pay, not whether.
+- **Per-sync carrying cost — and this splits three ways, not two.**
+  Vendoring into *this fork's* `skills/` means re-applying across every
+  upstream sync forever: expensive. Installing alongside as a separate
+  plugin costs nothing at sync time but pays the Filter 3 tax at runtime.
+  The third option is the cheap one and is easy to miss: **vendor into a
+  sibling plugin in a marketplace repo you own.** The synced fork never
+  sees those files, so the sync cost is zero, and because you control the
+  plugin boundary you can carry a curated subset instead of someone else's
+  whole pack — which is the only way to get past Filter 3, since a git
+  plugin source is all-or-nothing.
+
+  A marketplace can list plugins that live in *other* repositories, each
+  pinned independently by `ref` or exact `sha`. So "one pack for the team"
+  is a packaging question with a clean answer, and it does not force a
+  vendor-everything decision.
 
 ### The four outcomes
 
@@ -111,6 +122,20 @@ Two costs, both recurring:
   an existing skill. Default when a discipline collides: one gate, enriched.
 - **Decline** — an orchestration spine that is not ours, or a skill Filter 0
   makes inert on the branch in question.
+
+## Distribution is a separate question from adoption
+
+Worth stating because conflating the two produced the wrong answer the
+first time through. "I want to hand my devs one thing" is a *distribution*
+requirement, and it is satisfied by a marketplace repo, not by vendoring.
+Adoption decides *what* is in the set; distribution decides how it arrives.
+Filters 1-3 answer the first. Filter 4 answers the second.
+
+One consequence worth keeping: a marketplace entry pins a `ref`, so a fork
+with two branch philosophies becomes two named plugins in one catalog —
+`superpowers-human` at `main`, `superpowers-agents` at `agents`. The
+human/unattended split stops living in a branch name and becomes something
+a developer picks at install time.
 
 ## Applying it
 
@@ -149,6 +174,27 @@ grounds, not on quality.**
 | `code-review` | `requesting-code-review` + native `/code-review` | Decline, and note the name collision above. Their two-axis split (standards vs spec, in parallel subagents) is the same architecture native already runs with more axes and a false-positive verification stage. |
 | `prototype` | brainstorming's new **spike** path | Decline — and note the timing. Upstream v6.3.0 landed the spike path in this same sync. The gap this skill would have filled closed on its own. |
 
+### Filter 0 has a second half, and it bites after adoption
+
+The `disable-model-invocation` flag is the loud half. The quiet half — *does
+it wait for a person mid-flow?* — has to be read out of the skill body, and
+two of the four skills below fail it despite having no flag:
+
+- **`domain-modeling`** works by interrogating the user ("your glossary
+  defines 'cancellation' as X, but you seem to mean Y, which is it?"). No
+  answer ever arrives in an unattended run.
+- **`git-guardrails-claude-code`** is worse than inert, it is actively
+  breaking: its hook blocks `git push` with no branch distinction, and the
+  `agents` spine is always-PR, so it must push a feature branch. Installing
+  it unattended fails every run at its finish step.
+
+The lesson for the framework: **run Filter 0 per skill, not per pack, and
+run it against the skill body rather than the frontmatter.** A pack can be
+uniformly model-invokable and still be half unusable. Where a pack splits
+this way, split it at the *plugin* boundary rather than forking each skill
+into human and agent variants — variants double the maintenance and
+recreate exactly the trigger competition Filter 3 exists to prevent.
+
 ### The actual prize — reference layer, no collision (4 skills)
 
 These occupy a layer superpowers has nothing in. Superpowers tells an agent
@@ -172,11 +218,22 @@ looks like*. That is a real hole, and this is the pack that fills it.
   our branch answers that structurally rather than mechanically. A hook is a
   mechanical answer.
 
-**Recommendation: install-alongside, not vendored.** They are reference-layer
-with no trigger overlap, which is exactly the profile Filter 4 says to leave
-as its own plugin. Vendoring them would buy nothing and cost a re-apply on
-every sync forever. `domain-modeling` carries a `CONTEXT.md` setup cost;
-adopt it only in repos that will actually keep a glossary.
+**Recommendation: vendor the four into a curated plugin in our own
+marketplace repo**, split by the Filter 0 result above —
+`codebase-vocabulary` (codebase-design, resolving-merge-conflicts) for both
+spines, `codebase-vocabulary-human` (domain-modeling, git-guardrails) for
+interactive use only.
+
+This supersedes an earlier draft of this document, which said
+"install-alongside, not vendored." That was right about the cost of
+vendoring *into the fork* and wrong about the alternatives: it assumed the
+only two options were "inside `skills/`" or "a whole third-party plugin,"
+and a curated sibling plugin is both cheaper than the first and more precise
+than the second. Since a git plugin source is all-or-nothing, carrying a
+four-skill subset is only possible by copying — MIT, with attribution.
+
+`domain-modeling` carries a `CONTEXT.md` setup cost; adopt it only in repos
+that will actually keep a glossary.
 
 ## Open items
 
@@ -185,5 +242,7 @@ adopt it only in repos that will actually keep a glossary.
   they land. Not done here.
 - Whether `main` should eventually swap its spine for the mattpocock flow is
   a real question this doc deliberately does not answer.
-- `git-guardrails-claude-code` for `agents` is the highest-value single item
-  on this list and the cheapest to test.
+- `git-guardrails-claude-code` needs its blocked list narrowed before it can
+  be used in any repo that also runs the `agents` spine: allow pushing a
+  non-default branch, keep blocking pushes to `main`. Until then it is
+  interactive-only.
