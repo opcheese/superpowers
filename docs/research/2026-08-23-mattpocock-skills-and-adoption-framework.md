@@ -242,7 +242,19 @@ that will actually keep a glossary.
   they land. Not done here.
 - Whether `main` should eventually swap its spine for the mattpocock flow is
   a real question this doc deliberately does not answer.
-- `git-guardrails-claude-code` needs its blocked list narrowed before it can
-  be used in any repo that also runs the `agents` spine: allow pushing a
-  non-default branch, keep blocking pushes to `main`. Until then it is
-  interactive-only.
+- ~~`git-guardrails-claude-code` needs its blocked list narrowed~~ — **done.**
+  Our copy in the catalog is branch-aware: it blocks pushes resolving to a
+  protected branch and every force/mirror/all/delete push, and allows the
+  feature-branch push a PR requires. It is the one file in the catalog
+  modified from upstream, recorded in that plugin's `NOTICE.md`, and it
+  ships with a 34-case suite.
+
+  Worth recording *why* the suite exists: the first version of that script
+  silently allowed every push. It read command segments from a `printf`
+  with no trailing newline, so `read` hit EOF and the loop body never
+  executed once. The script looked right, exited 0 on everything, and
+  blocked nothing — a gate that could not fail, which is precisely what
+  `detector-weakening-sweep` is written to find. It was caught only because
+  the tests asserted the *blocking* direction rather than just checking
+  that safe commands still passed. A guard whose tests only prove it does
+  not fire is not tested at all.
