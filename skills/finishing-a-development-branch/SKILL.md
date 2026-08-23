@@ -107,13 +107,15 @@ body, adapting field names to the forge:
 - Linter: <pass/fail>
 
 ## Open items
-<parked findings, escalations, and residual review findings — or "none">
+<rulings made, parked findings, escalations, and residual review
+findings — or "none">
 ```
 
-Carry any parked findings, escalations, and residual final-review findings
-into that last section. An unattended run's PR is the only place a human
-learns what the loop could not resolve; a finding that lives only in a
-deleted workspace ledger is a silent discard.
+Carry every ledger `Ruling:` line, parked finding, escalation, and residual
+final-review finding into that last section, each with what it costs if
+wrong. An unattended run's PR is the only place a human learns what the loop
+decided on their behalf or could not resolve; a ruling or finding that lives
+only in a deleted workspace ledger is a silent discard.
 
 Report the PR/MR URL.
 
@@ -142,8 +144,23 @@ git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clean up any stale registrations
 ```
 
-**Otherwise:** The host environment owns this workspace — leave it in place.
-If your platform provides a workspace-exit tool, use it.
+**If removal is refused** (`contains modified or untracked files`): the
+worktree holds files that exist nowhere else — uncommitted plans, notes,
+or scratch work. Never `--force`. Unattended, there is nobody to weigh
+what would be destroyed, so preserve first and let the cleanup wait:
+
+```bash
+git -C "$WORKTREE_PATH" status --porcelain -uall
+```
+
+Commit anything that belongs to the branch and retry the removal. If what
+remains does not belong to the branch, leave the worktree in place, list
+the files in the PR description under Open items, and escalate (see
+superpowers:escalation). A worktree left standing costs disk; a
+`--force` costs work nobody can recover.
+
+**Otherwise:** The host environment owns this workspace — leave it in
+place. If your platform provides a workspace-exit tool, use it.
 
 ## Quick Reference
 
@@ -162,6 +179,7 @@ If your platform provides a workspace-exit tool, use it.
 | "The change is trivial, it can go straight to the base branch" | Triviality is a claim no reviewer got to check. Open the PR. |
 | "The PR is up, so the worktree is clutter now" | PR feedback gets fixed in that worktree. It stays until the work lands. |
 | "This other worktree looks stale — I'll clean it too" | Clean up only worktrees under `.worktrees/` or `worktrees/`. Everything else belongs to the host. |
+| "Removal refused — `--force` is just finishing the cleanup" | The refusal means files exist only in that worktree. `--force` destroys them permanently. Preserve, then escalate. |
 | "The base branch is obviously main" | Resolve it from the tracking branch or the remote's default, and say which you chose in the PR. |
 | "The push was rejected — force-push will fix it" | A rejected push means the remote moved. Investigate and rebase; never force-push unattended. |
 | "The parked findings are in the ledger, that's enough" | The workspace is deleted at the end of the plan. Findings that matter go in the PR description. |

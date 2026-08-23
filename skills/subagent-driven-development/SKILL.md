@@ -14,22 +14,40 @@ Execute plan by dispatching a fresh implementer subagent per task, a task review
 **Narration:** between tool calls, narrate at most one short line — the
 ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
+**Continuous execution:** Do not pause to check in with your human partner between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are the four named below, or all tasks complete. "Should I continue?" prompts and progress summaries waste their time — they asked you to execute the plan, so execute it.
 
-**Unattended operation:** This fork runs without a human in the loop. Two
-consequences bind every step below:
+**Rulings, not stalls.** A running plan does not wait on a human. Conflicts,
+ambiguities, plan defects, a cap you would have asked to exceed — decide
+them. The spec is the binding authority, the plan is its argument, and your
+judgment settles what neither answers. Record every decision in the ledger as
+`Ruling: <what you decided> — <why> — <what it costs if wrong>`, and keep
+going. A wrong ruling costs rework your human partner can see and undo; a
+session parked on a question costs their whole day and buys nothing.
+
+Four things stop you, and only these: an irreversible or destructive
+operation; a security-sensitive action; a side effect outside this worktree
+that norms say you ask about first (a merge, a push to a shared branch, a
+publish); and a plan so broken that every path forward is a guess. For those,
+stop and ask.
+
+**Unattended operation:** This fork runs without a human in the loop.
+Three consequences bind every step below:
 
 - An **automated verification gate** (see *Complete the task*) — not a human
   sign-off — is the last gate before a task is marked complete.
-- Wherever this skill would present a decision to, or stop for, your human
-  partner — a pre-flight plan conflict, a plan-mandated finding, a
-  load-bearing finding at the breaker, a residual finding after the final
-  review — you cannot wait on an answer. Use the **superpowers:escalation**
-  skill instead: log the blocked decision with its context and options, then
-  continue with other independent tasks. Escalating is not parking: the
-  ledger entry still records the finding and the ruling you could not make.
-  Do not guess past a genuine conflict, and do not silently proceed as if it
-  were resolved.
+- The four stops above have nobody to ask. Two of them this fork answers
+  structurally: it never merges and never pushes to a shared branch
+  (finishing-a-development-branch always opens a PR), and destructive or
+  irreversible operations are out of scope for a plan task. For the two that
+  remain — a security-sensitive action, and a plan so broken that every path
+  forward is a guess — use the **superpowers:escalation** skill: log the
+  blocked decision with its context and options, then continue with other
+  independent tasks. Escalation replaces *stop and ask*. It never replaces a
+  ruling you could have made: reaching for it to avoid deciding is the stall
+  the rulings discipline exists to prevent.
+- A ruling reaches nobody through a final message — this session may have no
+  reader. Every `Ruling:` line goes into the PR description that
+  finishing-a-development-branch opens (see *Finish*).
 
 ## When to Use
 
@@ -72,14 +90,14 @@ digraph process {
         "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" [shape=box];
         "Spec ✅ and quality approved?" [shape=diamond];
         "Finding conflicts with plan text?" [shape=diamond];
-        "Escalate (superpowers:escalation): finding beside plan text" [shape=box];
+        "Rule on the conflict, ledger the ruling" [shape=box];
         "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [shape=box];
         "Dispatch scoped re-review (./re-review-prompt.md)" [shape=box];
         "All findings addressed?" [shape=diamond];
         "R = 5?" [shape=diamond];
         "Adjudicate each open finding" [shape=box];
         "Any load-bearing finding?" [shape=diamond];
-        "STOP this task: ledger BLOCKED + superpowers:escalation" [shape=box];
+        "Rule and continue; escalate only if every path forward is a guess" [shape=box];
         "Park findings in ledger with rulings" [shape=box];
         "Run automated verification gate (tests + linter)" [shape=box];
         "Verification passed?" [shape=diamond];
@@ -102,8 +120,8 @@ digraph process {
     "Generate review package, dispatch task reviewer (./task-reviewer-prompt.md)" -> "Spec ✅ and quality approved?";
     "Spec ✅ and quality approved?" -> "Run automated verification gate (tests + linter)" [label="yes"];
     "Spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
-    "Finding conflicts with plan text?" -> "Escalate (superpowers:escalation): finding beside plan text" [label="yes"];
-    "Escalate (superpowers:escalation): finding beside plan text" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
+    "Finding conflicts with plan text?" -> "Rule on the conflict, ledger the ruling" [label="yes"];
+    "Rule on the conflict, ledger the ruling" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model";
     "Finding conflicts with plan text?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no"];
     "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" -> "Dispatch scoped re-review (./re-review-prompt.md)";
     "Dispatch scoped re-review (./re-review-prompt.md)" -> "All findings addressed?";
@@ -112,10 +130,10 @@ digraph process {
     "R = 5?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - next round"];
     "R = 5?" -> "Adjudicate each open finding" [label="yes - breaker trips"];
     "Adjudicate each open finding" -> "Any load-bearing finding?";
-    "Any load-bearing finding?" -> "STOP this task: ledger BLOCKED + superpowers:escalation" [label="yes"];
+    "Any load-bearing finding?" -> "Rule and continue; escalate only if every path forward is a guess" [label="yes"];
     "Any load-bearing finding?" -> "Park findings in ledger with rulings" [label="no"];
     "Park findings in ledger with rulings" -> "Run automated verification gate (tests + linter)";
-    "STOP this task: ledger BLOCKED + superpowers:escalation" -> "More tasks remain?" [label="independent tasks only"];
+    "Rule and continue; escalate only if every path forward is a guess" -> "Run automated verification gate (tests + linter)";
     "Run automated verification gate (tests + linter)" -> "Verification passed?";
     "Verification passed?" -> "Append completion to ledger, mark todo complete" [label="yes"];
     "Verification passed?" -> "Fix round R of 5: R≤3 resume implementer; R≥4 fresh implementer, more capable model" [label="no - failing output is a finding"];
@@ -161,22 +179,32 @@ a ledger file, not only in todos.
   that happens, recover from `git log`.
 
 Read the plan once, note its context and Global Constraints, and create a
-todo per task.
+todo per task. If the plan names a Spec, read that too: the spec is the
+authority the plan argues from, and conflicts inside the plan resolve
+against it. A plan with no reachable spec gets a ledger note saying so —
+rulings made without one are provisional.
 
-Before dispatching Task 1, scan the plan once for conflicts:
+Before dispatching Task 1, scan the plan once for conflicts, writing down
+what you checked as you check it:
 
 - tasks that contradict each other or the plan's Global Constraints
 - anything the plan explicitly mandates that the review rubric treats as a
   defect (a test that asserts nothing, verbatim duplication of a logic block)
 
-If the scan is clean, proceed without comment. If you find conflicts, you
-cannot wait on a human to adjudicate them: log them all at once with
-**superpowers:escalation** before execution begins — each finding beside the
-plan text that mandates it, noting which you believe governs and why — then
-proceed with the tasks the conflict does not block. One batched escalation,
-not one per discovery mid-plan. Do not guess past a genuine conflict on the
-affected task. The review loop remains the net for conflicts that only emerge
-from implementation.
+The scan's output is a table, not a verdict. One row for every pair of tasks
+that share a file or an interface: the two tasks, what one produces against
+what the other consumes, and what you found. One row for every task: whether
+its own text agrees with itself — the tests it specifies against the code it
+specifies, the files it creates against the files it later touches. "The scan
+is clean" without those rows is not a scan you ran.
+
+Write the table to the ledger. Rule on everything you find before execution
+begins — each finding against the plan text that mandates it — and record
+each ruling in the ledger. If the scan is clean, proceed without comment.
+Rule on each conflict it surfaces — the spec is the binding authority, the
+plan is its argument — record the ruling beside its row, and dispatch
+Task 1. The review loop remains the net for conflicts that only emerge from
+implementation.
 
 ## Model Selection
 
@@ -217,9 +245,28 @@ that implementer. Single-file mechanical fixes also take the cheapest tier.
 
 ## The Task Loop
 
+**Batch small same-shape work.** When the plan lists several tasks that are
+each a small, independent edit of the same kind — the same one-line fix,
+constant change, or field addition repeated across files — do not dispatch
+one subagent per task. Compose ONE dispatch brief listing every file and
+its change, send the whole batch to a single subagent, and review its diff
+as one unit. Reserve one-dispatch-per-task for work that needs its own
+judgment, its own tests, or its own review surface.
+
 Everything you paste into a dispatch prompt — and everything a subagent
 prints back — stays resident in your context for the rest of the session
 and is re-read on every later turn. Hand artifacts over as files.
+
+**Waiting on dispatched subagents:** never poll a wait interface with
+short timeouts, and never sit in one silent, open-ended wait either.
+While you have local work — ledger updates, packaging the next review,
+reading reports — keep working; child results arrive on their own.
+When you are genuinely idle, wait in bounded stretches (five to ten
+minutes, where your platform allows), and between stretches post one
+line of status and reconcile your live children: list them, and chase
+any that finished without reporting. A bounded stretch keeps nearly
+all of a long wait's efficiency while guaranteeing a stuck or lost
+child is noticed within minutes, not at the end of the session.
 
 ### 1. Dispatch the implementer
 
@@ -247,6 +294,12 @@ and fix-round diffs need it.
   later dispatches — a real session's dispatch hit 42k chars of which 99%
   was pasted history. A fresh subagent needs its task, the interfaces it
   touches, and the global constraints. Nothing else.
+- The dispatch carries the no-subagents contract (it is in the
+  implementer template): the implementer never dispatches subagents —
+  not helpers, and never a reviewer. Review arrives from you, after the
+  report. In real sessions, every reviewer a worker spawned duplicated
+  the task review the controller dispatched anyway — a full extra
+  review seat per task.
 - If an earlier task parked a finding in the area this task touches, carry
   a pointer to that ledger entry in the dispatch.
 - Record the implementer's agent identity from the dispatch result —
@@ -269,7 +322,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate via superpowers:escalation and continue with tasks the flaw does not block
+4. If the plan itself is wrong, rule on the correction, ledger it, and re-dispatch with the ruling carried in the dispatch
 
 **Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
 
@@ -336,12 +389,11 @@ Before the loop starts, two routes leave it immediately:
   before merge. A roll-up nobody reads is a silent discard. Minor findings
   never enter the loop.
 - A finding labeled plan-mandated — or any finding that conflicts with
-  what the plan's text requires — is a plan contradiction you cannot resolve
-  unattended: escalate it via superpowers:escalation with the finding beside
-  the plan text and which you believe governs, then let the loop proceed on
-  the findings that do not collide with the plan. Do not dismiss the finding
-  because the plan mandates it, and do not dispatch a fix that contradicts
-  the plan.
+  what the plan's text requires — is yours to rule on: weigh the finding
+  against the plan text, decide with the spec as the binding authority, and
+  ledger the ruling before you act on it. Do not dismiss the finding because
+  the plan mandates it, and do not dispatch a fix that contradicts the plan
+  without a recorded ruling.
 Everything else enters the loop. A fix round is one fix dispatch plus one
 scoped re-review. Five rounds maximum per task:
 
@@ -386,17 +438,19 @@ dispatching. Adjudicate each open finding yourself — you hold the plan and
 the cross-task context the reviewer lacks:
 
 - **The reviewer is wrong, or the point is contestable:** park it —
-  `Task <N>: parked — <finding> — ruling: <why the code stands>`. The final
+  `Task <N>: parked — <finding> — Ruling: <why the code stands>`. The final
   review sees both sides.
 - **Real, but nothing downstream builds on it:** park it the same way, with
   a ruling that says it's real and deferred.
 - **Real and load-bearing** — a later task builds on it, or it reveals a
-  plan defect: STOP this task. Append `Task <N>: BLOCKED — <reason>` and
-  invoke superpowers:escalation with the finding, the plan text it collides
-  with, and the fix history; then continue only with tasks that do not build
-  on the broken one. Do not mark the task complete. Parking a structural
-  failure lets every dependent task build on it and hands the final review a
-  problem it cannot fix either.
+  plan defect: rule on the smallest change that unblocks the dependent work,
+  ledger it as `Task <N>: Ruling: <finding> — <what you decided and why>`,
+  and carry it into the next task's dispatch. Parking a structural failure
+  silently lets every dependent task build on it. When the defect leaves
+  every path forward a guess, there is nobody to ask: append
+  `Task <N>: BLOCKED — <reason>`, invoke superpowers:escalation with the
+  finding, the plan text it collides with, and the fix history, and continue
+  only with tasks that do not build on the broken one.
 
 Adjudicate only at the cap. Adjudicating earlier to end a loop is
 pre-judging with a different name. Every adjudication is a ledger entry —
@@ -457,12 +511,27 @@ Then run exactly one scoped re-review of the fix wave
 (`scripts/review-package PLAN_FILE FIX_BASE HEAD` over the fix range,
 [re-review-prompt.md](re-review-prompt.md)).
 Adjudicate any residual findings as in the task loop's breaker: park with
-rulings, or stop on load-bearing ones. There is no second fix wave —
-residual load-bearing findings go to superpowers:escalation and into the
-PR description that finishing-a-development-branch opens, so the reviewer of
-that PR inherits them explicitly rather than by surprise.
+rulings, or rule on the load-bearing ones and ledger what you decided. Only
+the two escalating classes above stop you here. There is no second fix wave —
+residual rulings and any escalation go into the PR description that
+finishing-a-development-branch opens, so the reviewer of that PR inherits
+them explicitly rather than by surprise.
 
 ## Finish
+
+Before you delete anything, collect every ledger line containing `Ruling:` —
+preflight rulings, parked findings, breaker adjudications, all of them — plus
+every escalation you logged, in the order you made them, each with what it
+costs if wrong. The list is exhaustive: if the ledger holds a ruling, the
+list holds it.
+
+Unattended, that list does not go in a final message — no one is here to
+read one, and the workspace is about to be deleted. It goes into the
+**Open items** section of the PR description that
+finishing-a-development-branch opens, and it is the only place the decisions
+you took on your human partner's behalf survive to reach them: the PR
+reviewer reads them and reworks whatever you got wrong. A ruling that dies
+with the workspace was a decision made in secret.
 
 When the final whole-branch review is clean and its fixes are merged,
 delete this plan's workspace (`rm -rf <workspace>`) — the git history is
@@ -485,8 +554,10 @@ Use superpowers:finishing-a-development-branch.
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
 | "The reviewer approved, the gate is redundant" | The reviewer read a diff; it did not run the suite. The gate catches integration failures no per-task diff shows. |
 | "The implementer said tests pass" | That is the report, not the evidence. Run the suite yourself before the completion line. |
-| "I'll ask the human and pick this up when they answer" | Nobody is there. Escalate with superpowers:escalation and continue with independent work. |
-| "The plan mandates it, so the finding is void" | Neither wins by default. Escalate the collision with both texts; do not fix against the plan and do not discard the finding. |
+| "I'll ask the human and pick this up when they answer" | Nobody is there. Rule on it and ledger the ruling; escalate only for the two classes that have no safe ruling. |
+| "This is close enough to a stop-class to escalate" | Escalation is for a security-sensitive action or a plan where every path is a guess. Everything else is a ruling you are avoiding. |
+| "The plan mandates it, so the finding is void" | Neither wins by default. Weigh them with the spec as the binding authority and record the ruling. |
+| "The implementer spawned its own reviewer — free extra assurance" | It's a duplicate seat reviewing the same diff; the task review is the gate. A worker-spawned reviewer is a defect to flag, not rigor. |
 
 ## Example Workflow
 
