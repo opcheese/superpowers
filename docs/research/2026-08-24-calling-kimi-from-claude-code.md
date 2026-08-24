@@ -2,6 +2,7 @@
 title: Calling Kimi from Claude Code — what exists, and what actually works
 status: complete
 last_verified: 2026-08-24
+revised: 2026-08-24 — corrected six claims found in review; see Open questions
 owner: opcheese
 area: research
 audience: maintainers
@@ -38,9 +39,10 @@ call time or uses a placeholder.
 ## The constraint that shapes everything
 
 **Claude Code cannot route a subagent to a non-Anthropic provider.** The
-`model:` field in subagent frontmatter accepts `sonnet` / `opus` / `haiku` /
-`inherit`, all resolving to the same endpoint, and provider configuration
-(`ANTHROPIC_BASE_URL`) is session-wide. Per-agent provider routing is an open
+`model:` field in subagent frontmatter selects an Anthropic model — an alias
+(`sonnet`, `opus`, `haiku`, `inherit`), a form like `sonnet[1m]`, or a full
+model ID — and every one of them resolves against the same endpoint, because
+provider configuration (`ANTHROPIC_BASE_URL`) is session-wide. Per-agent provider routing is an open
 feature request ([anthropics/claude-code#38698][issue]) with no maintainer
 response; the only workaround discussed there is running separate terminal
 sessions, which discards the orchestrator-to-subagent relationship that makes
@@ -94,9 +96,17 @@ Discovery runs most-specific-first: `--agent-file` > project
 Three built-ins matter: `coder` (general, can write), **`explore`** (read-only,
 never modifies files), **`plan`** (no shell at all).
 
-Note that `~/.agents/agents/` shares the `~/.agents/` root that the
-shadow-learn memory store already uses. The two conventions converge without
-being coordinated.
+**Containment and delegation are not available at the same time.** Built-in
+sub-agents cannot dispatch further sub-agents, so `--agent explore` buys
+read-only containment and no orchestration. Getting Kimi to orchestrate needs
+a custom agent with an explicit `subagents` allowlist — which is a write-capable
+agent unless its `tools` say otherwise. Pick one per call; the choice is real.
+
+Note that `~/.agents/agents/` sits under the same `~/.agents/` root that the
+skills marketplace installs into — alongside `bin/`, `skills/` and a
+`.skill-lock.json`. Upstream treats `~/.agents/` as a generic cross-tool
+directory. Anything written there shares space with a lock-file-managed
+installer, which matters when deciding where agent definitions should live.
 
 ## Path B — Claude Code's agent system, Kimi's brain
 
@@ -106,9 +116,12 @@ while keeping its own agent definitions, permission system and tool
 allowlists:
 
 ```
-claude -p --settings '{"env":{"ANTHROPIC_BASE_URL":"https://api.kimi.com/coding","ANTHROPIC_AUTH_TOKEN":"<from apiKeyHelper>","ANTHROPIC_MODEL":"k3"}}' \
+claude -p --settings '{"env":{"ANTHROPIC_BASE_URL":"https://api.kimi.com/coding","ANTHROPIC_MODEL":"k3"},"apiKeyHelper":"/abs/path/to/kimi-credential"}' \
        --agent kimi-reviewer --allowedTools Read Grep Glob
 ```
+
+The credential arrives through `apiKeyHelper`, never as a literal
+`ANTHROPIC_AUTH_TOKEN` in the settings blob — see below for why.
 
 Every piece is a shipped flag: `--settings` takes a file *or* a JSON string,
 `settings.json` supports an `env` block, and `--agent`, `--agents`,
@@ -120,26 +133,29 @@ all exist.
 token is stale within the hour and is a secret at rest besides. Claude Code's
 `apiKeyHelper` setting is the correct seam: a command that returns a fresh
 credential per call, reading and refreshing from the Kimi credential file.
-*Writing that helper is the one piece of work Path B still needs; it was not
-built or tested during this research.*
+*That helper was the one piece of work Path B still needed. It has since been
+built and verified — see the `kimi-delegation` plugin in the skills catalog.*
 
 ## Choosing between them
 
 | | Path A — Kimi's agents | Path B — Claude Code's agents |
 | --- | --- | --- |
 | Invocation | `kimi -p --agent <name>` via Bash | `claude -p --agent <name>` + `--settings` |
-| Containment | Kimi `tools` / `disallowedTools`; `explore`, `plan` | Claude Code's permission system |
+| Containment | Kimi `tools` / `disallowedTools`, pinned with `--agent-file` | Claude Code's permission system |
 | Agent definitions | `.kimi-code/agents/`, `~/.agents/agents/` | `.claude/agents/*.md` |
-| Orchestration | Kimi's own sub-agents | Claude Code's |
+| Orchestration | Kimi's own sub-agents, but only via a custom agent — built-ins cannot dispatch | Claude Code's |
 | Auth | Working today | Working, pending `apiKeyHelper` |
 | New code | None | The credential helper |
 
 They are not alternatives. Path B gives a Kimi-powered agent that lives in the
 normal Claude Code setup and obeys its permissions — the better fit for an
-independent reviewer. Path A hands a task to Kimi and lets *it* orchestrate
-its own sub-agents, returning only a result — the better fit for bulk work
-that should not spend Claude quota. **Both are wanted, for flexibility and
-control.**
+independent reviewer. Path A hands a task to Kimi and returns only a result —
+the better fit for bulk work that should not spend Claude quota. **Both are
+wanted, for flexibility and control.**
+
+Path A's orchestration is conditional, not free: a contained built-in cannot
+dispatch sub-agents, so letting Kimi drive its own fan-out means writing a
+custom agent with a `subagents` allowlist and choosing its `tools` deliberately.
 
 ## Verified behaviour
 
@@ -150,17 +166,28 @@ Everything in this table was executed.
 | `kimi -p` on the subscription | Works. ~9–11s round trip, exit 0 |
 | Unattended tool use in `-p` | Yes — read a file and diagnosed a planted bug |
 | **Unattended writes in `-p`** | **Yes, no approval gate.** Edited code and created a file |
-| `-p` with `--yolo` / `--auto` / `--plan` | **Rejected** — "Cannot combine". `-p` is already effectively yolo |
-| `-p --agent explore`, told to write | **Refused.** Reported findings instead; files verified unchanged |
+| `-p` with `--yolo` / `--auto` / `--plan` | **Rejected** — identical `Cannot combine --prompt with --X` for all three. A blanket prompt-mode exclusion, not a statement about permissions |
+| `-p --agent explore`, told to write | **Refused** in a clean repo. Reported findings instead; files verified unchanged |
+| The same, in a repo shipping `.kimi-code/agents/explore.md` | **Wrote.** The repo's definition wins; containment lost. Pin with `--agent-file` |
 | `--output-format stream-json` | One JSON object per line: `{"role":"assistant","content":…}` plus a `meta` / `session.resume_hint` line |
 | Anthropic endpoint + subscription OAuth | **HTTP 200.** Well-formed Anthropic `message`, includes `thinking` blocks |
 | `--agent` / `--agent-file` on 0.18.0 | Absent. Present on 0.38.0 |
 
 The two bolded rows are the point. Headless Kimi with no agent specified will
-modify a repository unasked, and `--yolo` is refused precisely *because* `-p`
-already behaves that way. Naming a read-only agent is what contains it — which
-is why Path A depends on 0.38.0 and why an unqualified `kimi -p` should never
-be pointed at a working tree.
+modify a repository unasked. Note that `--plan` — the semantic opposite of
+`--yolo` — is refused in exactly the same words, so the rejection says nothing
+about permissions; it is a blanket prompt-mode exclusion. The unattended-writes
+observation stands on its own, and it is why Path A depends on 0.38.0 and why an
+unqualified `kimi -p` should never be pointed at a working tree.
+
+**Naming a read-only agent is not sufficient.** Agent *names* resolve
+project-first, so a repository shipping `.kimi-code/agents/explore.md` with
+`override: true` replaces the built-in and takes write access back. This was
+tested, and the repository's definition won: the delegate edited a file and
+created another. Upstream's trust-model warning is explicit — an `override: true`
+definition replaces the main agent's system prompt entirely, and a definition
+with no `tools` list keeps every tool. Containment has to be pinned with
+`--agent-file`, which outranks project discovery.
 
 ## Operational notes
 
@@ -179,21 +206,28 @@ idempotent. Expect the same misdetection on future upgrades.
 
 **Other Kimi surfaces, for completeness.** `kimi acp` speaks Agent Client
 Protocol over stdio for Zed and JetBrains — Claude Code is not an ACP client,
-so it is not a route here. `kimi server` runs a local REST + WebSocket daemon.
+so it is not a route here. `kimi server` is deprecated on 0.38.0 in favour of
+`kimi web`, which runs the local server and opens the web UI.
 Kimi is an MCP *client*, not a server, so it cannot be attached to Claude Code
 as one.
 
 ## Open questions
 
-- The `apiKeyHelper` credential helper for Path B is unwritten and untested.
-  Whether the refresh flow can be driven without the Kimi CLI itself holding
-  the lock on the credential file is unknown.
+- **Resolved.** The `apiKeyHelper` for Path B is built and verified. Refresh is
+  delegated to the Kimi CLI rather than reimplemented: any successful call
+  rewrites the credential file. `kimi -p "ok"` does this; `kimi provider list`
+  does not, because it reads local configuration and never contacts the API.
+- **Resolved, and it changed the design.** Agent names are resolved
+  project-first, so a repository can override a read-only built-in and take
+  write access back. Containment must be pinned with `--agent-file`. Treat any
+  repository-supplied agent definition as hostile input.
 - Concurrency: the subscription is documented as capped at 30 concurrent
   requests, which bounds any fan-out design. Not tested.
 - Whether Kimi agent definitions should be version-controlled per project
   (`.kimi-code/agents/`) or kept user-global (`~/.agents/agents/`) is a
   distribution question, unresolved, and it interacts with how the catalog
-  ships skills to devs.
+  ships skills to devs. Note that the project-scoped option is the one an
+  untrusted repository controls.
 
 [issue]: https://github.com/anthropics/claude-code/issues/38698
 
