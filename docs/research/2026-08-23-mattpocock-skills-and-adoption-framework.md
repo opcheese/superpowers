@@ -208,7 +208,7 @@ looks like*. That is a real hole, and this is the pack that fills it.
   against `CONTEXT.md`, sharpen fuzzy language, and the three-part ADR test
   (hard to reverse, surprising without context, a real trade-off). The ADR
   test is good enough to be worth having regardless of the rest.
-- **`resolving-merge-conflicts`** — 133 words, no analogue anywhere in
+- **`resolving-merge-conflicts`** — 117 words, no analogue anywhere in
   superpowers, and merge conflicts are exactly the situation where an
   unattended agent does something regrettable.
 - **`git-guardrails-claude-code`** — hooks that block `push`, `reset --hard`,
