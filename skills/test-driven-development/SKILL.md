@@ -44,6 +44,12 @@ Write code before the test? Delete it. Start over.
 
 Implement fresh from tests. Period.
 
+## Before The First Test
+
+The interface is the test surface, so the seam must be settled before RED. Ask once, up front: does testing this require reshaping the module — injecting a dependency, adding an options bag, constructing a client lazily, widening a signature?
+
+If yes, that is a seam decision, not test scaffolding. Invoke codebase-vocabulary:codebase-design (when installed) and settle it before writing the test. If no, go straight to RED.
+
 ## Red-Green-Refactor
 
 ```dot

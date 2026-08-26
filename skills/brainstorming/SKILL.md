@@ -95,10 +95,12 @@ path and complete them in order.
 1. **Explore project context** — check files, docs, recent commits
 2. **Analyze requirements** — identify purpose, constraints, success criteria from the task description and codebase
 3. **Evaluate 2-3 approaches** — with trade-offs, select the best one with reasoning
-4. **Generate design** — complete design covering architecture, components, data flow, error handling, testing
-5. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-6. **Spec review via subagent** — dispatch the spec-document-reviewer subagent (see below); fix any findings and re-review until it passes
-7. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+4. **Name the boundaries** — if the design creates, moves, or removes one, invoke codebase-vocabulary:codebase-design (when installed) and use its vocabulary and deletion test; skip only if no boundary moves
+5. **Generate design** — complete design covering architecture, components, data flow, error handling, testing
+6. **Record the model** — if the design coins, renames, or redefines a domain term, or you rejected an alternative worth keeping, invoke codebase-vocabulary-human:domain-modeling (when installed); skip only if the vocabulary is unchanged
+7. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+8. **Spec review via subagent** — dispatch the spec-document-reviewer subagent (see below); fix any findings and re-review until it passes
+9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
 
@@ -112,7 +114,9 @@ digraph brainstorming {
     "Explore project context" [shape=box];
     "Analyze requirements" [shape=box];
     "Evaluate approaches" [shape=box];
+    "Name the boundaries" [shape=box];
     "Generate complete design" [shape=box];
+    "Record the model" [shape=box];
     "Write design doc" [shape=box];
     "Dispatch spec-document-reviewer subagent" [shape=box];
     "Review passes?" [shape=diamond];
@@ -129,8 +133,10 @@ digraph brainstorming {
 
     "Explore project context" -> "Analyze requirements";
     "Analyze requirements" -> "Evaluate approaches";
-    "Evaluate approaches" -> "Generate complete design";
-    "Generate complete design" -> "Write design doc";
+    "Evaluate approaches" -> "Name the boundaries";
+    "Name the boundaries" -> "Generate complete design";
+    "Generate complete design" -> "Record the model";
+    "Record the model" -> "Write design doc";
     "Write design doc" -> "Dispatch spec-document-reviewer subagent";
     "Dispatch spec-document-reviewer subagent" -> "Review passes?";
     "Review passes?" -> "Fix findings" [label="no"];
