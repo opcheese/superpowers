@@ -15,8 +15,7 @@ which links the full rationale.
 
 **Range:** upstream `v6.3.0` → `v7.0.0`: three squashed release commits
 (v6.4.1, v6.4.2, v7.0.0), 106 files.
-**Result:** `main` at `522b723` (pushed). `agents` merge at `17819c2` on
-`sync/agents-v7.0.0`.
+**Result:** `main` at `522b723`, `agents` at `23ade75`, both pushed.
 
 ## Strategy
 
@@ -110,8 +109,10 @@ merged line by line.
 - The only deletions relative to each pre-merge tip are upstream's own:
   `CLAUDE.md`, `spec-document-reviewer-prompt.md` and
   `plan-document-reviewer-prompt.md`.
-- **No RED/GREEN skill evals were run for the re-applied changes.**
-  Pending items:
+- **No RED/GREEN skill evals were run for the re-applied changes.** The
+  maintainer chose to merge without them (2026-10-12) and treat real
+  unattended runs as the test. If one goes wrong, these are the first
+  suspects:
   - On `agents`: the brainstorming builder-check sorting, especially
     "theirs" becoming a ruling and not an escalation.
   - On `agents`: the writing-plans automatic handoff.
