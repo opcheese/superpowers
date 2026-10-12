@@ -6,7 +6,7 @@ status: complete
 
 # Codex vs Claude Code: the harnesses, October 2026
 
-This compares the two tools as **harnesses**: memory, multi-agent work, review, session-to-session communication, automation and extensibility. Models are left out; for model choice see `2026-10-12-theo-t3dotgg-tooling-digest.md`.
+This compares the two tools as **harnesses**: memory, multi-agent work, review, session-to-session communication, automation and extensibility. Models are left out; model choice is covered in local, unpublished notes.
 
 **Versions compared:** Claude Code **2.1.296** (Oct 9 2026, installed here) and Codex CLI **0.162.x** (Oct 8–9 2026) plus the ChatGPT desktop app, which now hosts Codex. Sources are the official docs as fetched on 2026-10-12: [code.claude.com/docs](https://code.claude.com/docs/llms.txt) and [learn.chatgpt.com](https://learn.chatgpt.com/llms.txt). The old developers.openai.com/codex pages redirect to learn.chatgpt.com. Copies of the fetched pages are in the gitignored `.superpowers/research/harness/`. Third-party comparison posts are not used for any fact here, because most still describe GPT-5.x / Opus 4.x setups.
 
@@ -41,7 +41,7 @@ For our skills (the superpowers fork, codebase-vocabulary, kimi-delegation), Cla
 
 ## What actually differs in practice
 
-**Memory, philosophically opposite defaults.** Claude Code learns by default and curates a typed, indexed memory per repo. Codex leaves memory off and treats it, when on, as lossy background recall. Theo's "Turn off Claude Code's Memory" (Aug 25) argues Codex's default is right for coding: he found most auto-memories on his machine unread or stale. Our fork's memory files are curated by hand, which avoids the problem he describes. Teams that don't curate should either audit `~/.claude/projects/*/memory/` or set `autoMemoryEnabled: false` per repo.
+**Memory, philosophically opposite defaults.** Claude Code learns by default and curates a typed, indexed memory per repo. Codex leaves memory off and treats it, when on, as lossy background recall. A popular argument (Theo Browne, "Turn off Claude Code's Memory", Aug 25) is that Codex's default is right for coding: he found most auto-memories on his machine unread or stale. Our fork's memory files are curated by hand, which avoids the problem he describes. Teams that don't curate should either audit `~/.claude/projects/*/memory/` or set `autoMemoryEnabled: false` per repo.
 
 **Multi-agent depth is Claude Code's clearest lead.** Codex has competent subagents and parallel worktree tasks. Claude Code has three more layers on top of that:
 
