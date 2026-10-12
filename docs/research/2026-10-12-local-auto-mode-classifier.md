@@ -59,7 +59,7 @@ An open Ollama issue asks Ollama to support server review
 
 ## How the classifier works on the wire
 
-Each check is one or two requests with a ~30k-token system prompt ("You are
+Each check is one or two requests with a system prompt of 30–33k tokens in total ("You are
 a security monitor for autonomous AI coding agents"), a transcript of the
 user's messages and the pending action, and an instruction:
 
@@ -108,7 +108,7 @@ What the table means:
 - **`gemma3:12b` is fast and blocks routine work.** In the live session it
   also blocked `python3 app.py` as "Git Destructive". Too small.
 - **Expect about 10 seconds per checked shell command** on a 5090, more on
-  the first check while the 30k-token prompt fills the cache. A main model
+  the first check while the 30–33k-token prompt fills the cache. A main model
   and a classifier model that differ both have to stay loaded, so check that
   both fit in VRAM.
 

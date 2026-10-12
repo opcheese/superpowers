@@ -21,7 +21,7 @@ first request for `claude-sonnet-5`.
 **Context must be set in Ollama, not in Claude Code.** Claude Code can't tell
 Ollama the context size, and Ollama loaded `qwen3.8:27b` at 32k by default.
 Prompts reached 32–33k tokens within a few steps (the classifier prompt
-alone is ~30k), so 32k cuts them short. A copy of the model with `num_ctx
+alone is 30–33k across 46 logged calls), so 32k cuts them short or overflows. A copy of the model with `num_ctx
 131072` fixes it. Memory and speed at 128k (40k-token prompt):
 
 | Model | GPU memory at 128k | Prompt processing | Generation |
@@ -96,6 +96,16 @@ git commit`, and the remote stayed empty.
 The guide also no longer claims code never leaves the machine. It notes
 that `skipWebFetchPreflight` turns off Anthropic's unsafe-domain blocklist,
 and tells Linux users to use `systemctl`, not `ollama serve`.
+
+## After external review: a second `--settings` flag
+
+An outside reader asked what happens if someone adds their own `--settings`
+to `claude-local`. Tested: the second flag replaces the first entirely. The
+session dropped the whole local `env` block and connected to
+`api.anthropic.com` (refused only because the test config was logged out;
+a logged-in config would have sent the prompt and billed the account). The
+function now refuses `--settings` and `--settings=…` with an error, and uses
+`127.0.0.1:11434` rather than `localhost`, which tried `::1` first.
 
 ## Reproducing
 
