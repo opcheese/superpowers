@@ -30,7 +30,7 @@ misclassification, so it has to be auditable after the fact:
   "quick and dirty is fine") whose output is an answer, not code you
   keep. Record the question and what you'll try in 2-3 sentences, then
   find out as cheaply as correctness allows. No design doc, no spec file,
-  no spec review. Report findings as a recommendation; anything you built
+  no builder check. Report findings as a recommendation; anything you built
   stays labeled throwaway and does not get merged.
 - **Bounded** — a well-scoped change to code that already exists in this
   repo: a new flag, a small endpoint, a one-file fix. Understanding the
@@ -39,12 +39,12 @@ misclassification, so it has to be auditable after the fact:
   is not bounded. Analyze the requirements that matter, write a short
   design (a few sentences to a few short paragraphs) into the run's
   record, and implement it through the normal development workflow — TDD
-  applies, and the task review is the gate. No spec file, no spec-review
+  applies, and the task review is the gate. No spec file, no builder-check
   subagent, no implementation plan document.
 - **Architectural** — new projects, new subsystems, changes that
   restructure how components fit together or alter interfaces others
   depend on. Follow the full process: requirements, approaches, sectioned
-  design, written spec, spec review via subagent, then the writing-plans
+  design, written spec, builder check via subagent, then the writing-plans
   skill.
 
 When in doubt between two paths, take the heavier one — and unattended,
@@ -73,6 +73,8 @@ the artifact, never the gate.
 | "The spike works, so I'll keep the code" | A spike's output is an answer. Keeping the code is a new request — classify it. |
 | "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-task. Record the upgrade and step up. |
 | "No human is watching, so the classification is just bookkeeping" | It is the only record of why this task got the process it got. Write it down. |
+| "The builder's question is theirs to answer, so I'll escalate it" | Unattended, a question only they could answer gets a recorded ruling and goes to Open items. Escalate only when there is no intent to rule from. |
+| "I'll skip the builder check, I know what I meant" | You know what you meant. The check finds what the document doesn't say. |
 
 ## Checklist
 
@@ -99,7 +101,7 @@ path and complete them in order.
 5. **Generate design** — complete design covering architecture, components, data flow, error handling, testing
 6. **Record the model** — if the design coins, renames, or redefines a domain term, or you rejected an alternative worth keeping, invoke codebase-vocabulary-human:domain-modeling (when installed); skip only if the vocabulary is unchanged
 7. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-8. **Spec review via subagent** — dispatch the spec-document-reviewer subagent (see below); fix any findings and re-review until it passes
+8. **Builder check via subagent** — dispatch a fresh builder with `builder-check-prompt.md` (see below); sort its questions, settle them in the doc, commit
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
@@ -118,9 +120,9 @@ digraph brainstorming {
     "Generate complete design" [shape=box];
     "Record the model" [shape=box];
     "Write design doc" [shape=box];
-    "Dispatch spec-document-reviewer subagent" [shape=box];
-    "Review passes?" [shape=diamond];
-    "Fix findings" [shape=box];
+    "Dispatch builder-check subagent" [shape=box];
+    "Sort questions: answered / minor / theirs" [shape=box];
+    "Settle each in the doc; rule on 'theirs'" [shape=box];
     "Invoke writing-plans skill" [shape=doublecircle];
     "Hidden complexity? Upgrade path" [shape=box];
 
@@ -137,11 +139,10 @@ digraph brainstorming {
     "Name the boundaries" -> "Generate complete design";
     "Generate complete design" -> "Record the model";
     "Record the model" -> "Write design doc";
-    "Write design doc" -> "Dispatch spec-document-reviewer subagent";
-    "Dispatch spec-document-reviewer subagent" -> "Review passes?";
-    "Review passes?" -> "Fix findings" [label="no"];
-    "Fix findings" -> "Dispatch spec-document-reviewer subagent" [label="re-review"];
-    "Review passes?" -> "Invoke writing-plans skill" [label="yes"];
+    "Write design doc" -> "Dispatch builder-check subagent";
+    "Dispatch builder-check subagent" -> "Sort questions: answered / minor / theirs";
+    "Sort questions: answered / minor / theirs" -> "Settle each in the doc; rule on 'theirs'";
+    "Settle each in the doc; rule on 'theirs'" -> "Invoke writing-plans skill";
 }
 ```
 
@@ -202,21 +203,36 @@ process.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
-**Spec Review (via subagent):**
-After writing and committing the spec document, dispatch the spec-document-reviewer
-subagent to validate it — this is the autonomous quality gate that replaces a
-human spec review. Use the template in `spec-document-reviewer-prompt.md`, passing
-the spec file path. The reviewer checks:
+**Builder check (via subagent):**
+After writing and committing the spec, dispatch a fresh subagent with the
+prompt in `builder-check-prompt.md`, passing the spec path and the domain.
+It reads the design as the person who has to plan and build from it,
+unable to ask the author anything, and lists the questions they would
+still have to guess at. This is the autonomous gate that replaces a human
+reading the spec. Do not invoke writing-plans until it is back.
 
-1. **Completeness:** placeholders, "TBD"/"TODO", incomplete sections.
-2. **Internal consistency:** contradictory or conflicting requirements; architecture matching the feature descriptions.
-3. **Scope:** focused enough for a single implementation plan, or needs decomposition.
-4. **Ambiguity:** any requirement open to two interpretations.
+Sort every question into one of three piles:
 
-Fix every finding the reviewer returns, then re-dispatch the reviewer. Repeat until
-it passes with no findings. Only then proceed to implementation. If a finding is
-genuinely ambiguous and no safe default exists, escalate (see superpowers:escalation)
-rather than guess.
+- **Answered already** by the request, the repo, or your analysis: put the
+  answer in the spec.
+- **Minor:** a sensible builder could settle it without changing what gets
+  built. Settle it and mark it in the spec as your call.
+- **Theirs:** only the person who asked could answer it, and the answer
+  changes what gets built. Unattended, nobody is here to answer, so rule
+  on it: pick the option that best serves the stated intent, write it into
+  the spec as `Ruling: <decision> — <why> — <what it costs if wrong>`, and
+  carry it forward. Rulings reach the human through the PR's **Open
+  items** (see superpowers:finishing-a-development-branch). Escalate (see
+  superpowers:escalation) only when every option is a guess with no
+  intent to rule from.
+
+Choices about how the thing gets made (platform, language, libraries,
+medium) follow the same rule: build on what the repo already uses, and
+any choice the request didn't make goes in the spec as your call, never as
+something the requester agreed to.
+
+Commit the updated spec. The builder check runs once; its job is to
+surface what a builder would guess at, not to approve the design.
 
 **Implementation:**
 
