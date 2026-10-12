@@ -71,6 +71,32 @@ connects only to the site it fetches.
 - Not tested: `/code-review`, which the interactive spine asks for after
   each task, artifacts, and Remote Control.
 
+## After review: the function was hardened
+
+A review of the guide found that the spike's clean, logged-out config hid
+two risks a real `~/.claude` has. Both were fixed and retested.
+
+**A settings `env` block beats shell variables.** Claude Code writes each
+settings `env` entry over the inherited environment (env-vars, "the settings
+file value applies in most sessions"). A user or project settings file that
+sets `ANTHROPIC_BASE_URL`, for example for Kimi, would silently redirect a
+shell-variable `claude-local`. The function now passes everything as an
+`env` block inside `--settings`, which outranks user and project settings.
+Test: a project `.claude/settings.json` pointing at `127.0.0.1:9` with a
+Claude model. The run used only the local model, and strace showed
+connections only to Ollama.
+
+**Code does leave through `git push`.** Auto mode is the default start mode
+for terminal sessions from 2.1.283, and allows pushes to the repo's own
+remote. The function adds `permissions.ask: ["Bash(git push:*)"]`. Test: a
+repo with a local bare remote, asked to commit and push. The commit landed;
+every push was held for approval, including one chained after `git add &&
+git commit`, and the remote stayed empty.
+
+The guide also no longer claims code never leaves the machine. It notes
+that `skipWebFetchPreflight` turns off Anthropic's unsafe-domain blocklist,
+and tells Linux users to use `systemctl`, not `ollama serve`.
+
 ## Reproducing
 
 Everything is in the gitignored
@@ -78,5 +104,5 @@ Everything is in the gitignored
 `session.sh` and `report.py` (`-p` runs through a logging proxy, under
 `strace`), `interactive.py` (pty-driven interactive run, since tmux isn't
 installed), `ctxbench.py` (context vs memory and speed), `modelfiles/`,
-`claude-local.sh` (the tested shell function), `logs/` and `runs/` (each
+`claude-local-v2.sh` (the shipped shell function; `claude-local.sh` is the first version), `logs/` and `runs/` (each
 run's repo, with its commits).
