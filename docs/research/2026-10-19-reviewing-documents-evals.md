@@ -26,11 +26,14 @@ Three plan reviews elsewhere ran 16, 12 and 11 graded rounds. The reviewer was a
 | Plain "review this" (3 + 3) | ~20–30 incl. minors / 1 medium + 3–8 low | 1 medium per rep, a different one each time | mostly, labelled | 3/3 |
 | Skill v1 (3 + 3) | 6, 6, 11 / 0, 1, 1 | sound 3/3; 0 medium; 2/3 the same low | every finding | 3/3 |
 | Skill v2 (3) | 6, 6, 6 | not re-run | every finding | 0/3, see below |
-| Skill v3, as shipped | not run | not run | not run | unmeasured |
+| Skill v3, research pinned to ecc8b5c (3) | 6, 8, 7 | not re-run | every finding | 0/3 |
+| Skill v3, reading cdb76ee, which states K1 outright (3) | 3, 7, 5 | not re-run | every finding | 3/3, by reading, not recall |
 
 - On the clean control, the quota arm re-raised at least three items its earlier rounds had already ruled, one of them escalated to medium. All three reps independently raised one case the plan had ruled out of scope before it was written; the method session scored it as at most a latent low.
 - The skill's reviewers returned "sound" on the control, one of them with no findings at all, listed what they checked (including Postgres probes of the plan's SQL), and named the ruled items they did not re-raise.
 - **Recall cost.** On the defective plan the plain reviewers, which list everything, found the mechanical defects K2 and K6 in 3/3 reps. The skill's clean reps found K2 in 1/4 and K6 in 1/4. The skill buys precision and convergence with some recall on medium and low mechanical defects. One review per round makes that recall matter.
+- **v3, as shipped (research pinned to ecc8b5c, 3 reps, local fakes only):** K1 0/3, K2 1/3, K3 0/3, K4 3/3, K5 3/3, K6 0/3. K1 fails the 2-of-3 bar set before the run; the shipped reviewer does not reliably find the top containment defect from the discovery-order line alone. The same reps converged on real defects outside the answer key, each in at least 2 of 3: Path B `--output stream-json` fails without `--verbose`; the skill's unbraced `$CLAUDE_PLUGIN_ROOT` does not resolve; Task 8's nested fences truncate SKILL.md; Task 10's persistent `cd` makes the secret scan print "clean" without scanning; the TTL contradiction; a push straight to `main`. The first two, and a copied LICENSE naming the wrong copyright holder (found by one rep), are in the shipped plugin.
+- **v3 reading the current research (cdb76ee, 3 reps):** cdb76ee was committed four hours after the plan and states K1 outright, so its K1 3/3 measures reading, not recall. It is what a user gets when the research has moved on: K1 3/3, K4 3/3, K5 2/3 (the third listed it as unverified), K2, K3 and K6 0/3.
 - **v2's K1 misses are not explained by its brief.** The v2 briefs pinned the research to ecc8b5c, but that version already states the discovery order ("`--agent-file` > project"), and a clean v1 rep found K1 from ecc8b5c plus a diff to cdb76ee. One v2 rep read it and still concluded the plan matched. So 0/3 may be a recall regression from v2's "cover it, then check it" ordering. The shipped reviewer prompt (v3) has not been run on the reviewer half, so its K1 recall is unmeasured.
 - **Contamination, disclosed by the agents:** one v1 rep read the later fix commits after its own spikes; one loaded the later released plugin. Recall is counted on the clean reps only (K5's 6/6 below includes the rep that read the fix commits and the rep that loaded the released plugin; 4/4 without them). The reviewer prompt now forbids reading later versions of the document or of what it builds.
 
@@ -59,7 +62,6 @@ With the line, 3/3 agents asked to get a plan reviewed used `reviewing-documents
 
 ## Not tested
 
-- The shipped reviewer prompt (v3) on the reviewer half: K1, K2 and K6 recall are unmeasured for it.
 - The skill's description triggering the skill unprompted (all runs pointed at it by path).
 - A real multi-round run end to end, including the round counter reading the commit subjects.
 - The `main` wording (human partner) beyond the SDD note micro-test.
