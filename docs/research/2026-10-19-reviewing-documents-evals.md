@@ -26,12 +26,13 @@ Three plan reviews elsewhere ran 16, 12 and 11 graded rounds. The reviewer was a
 | Plain "review this" (3 + 3) | ~20–30 incl. minors / 1 medium + 3–8 low | 1 medium per rep, a different one each time | mostly, labelled | 3/3 |
 | Skill v1 (3 + 3) | 6, 6, 11 / 0, 1, 1 | sound 3/3; 0 medium; 2/3 the same low | every finding | 3/3 |
 | Skill v2 (3) | 6, 6, 6 | not re-run | every finding | 0/3, see below |
+| Skill v3, as shipped | not run | not run | not run | unmeasured |
 
 - On the clean control, the quota arm re-raised at least three items its earlier rounds had already ruled, one of them escalated to medium. All three reps independently raised one case the plan had ruled out of scope before it was written; the method session scored it as at most a latent low.
 - The skill's reviewers returned "sound" on the control, one of them with no findings at all, listed what they checked (including Postgres probes of the plan's SQL), and named the ruled items they did not re-raise.
-- **Recall cost.** On the defective plan the plain reviewers, which list everything, found the mechanical defects K2 and K6 in 3/3 reps. The skill's clean reps found K2 in 1/5 and K6 in 1/5. The skill buys precision and convergence with some recall on medium and low mechanical defects. One review per round makes that recall matter.
-- **v2's K1 misses are a brief artifact.** The v2 briefs told reviewers to read the research "at the version current at the plan's date", which predates the executed test that settles K1. The reviewer prompt now says to read the current version of every input and treat a later change as evidence.
-- **Contamination, disclosed by the agents:** one v1 rep read the later fix commits after its own spikes; one loaded the later released plugin. Recall is counted on the clean reps only. The reviewer prompt now forbids reading later versions of the document or of what it builds.
+- **Recall cost.** On the defective plan the plain reviewers, which list everything, found the mechanical defects K2 and K6 in 3/3 reps. The skill's clean reps found K2 in 1/4 and K6 in 1/4. The skill buys precision and convergence with some recall on medium and low mechanical defects. One review per round makes that recall matter.
+- **v2's K1 misses are not explained by its brief.** The v2 briefs pinned the research to ecc8b5c, but that version already states the discovery order ("`--agent-file` > project", line 90), and a clean v1 rep found K1 from the same text. One v2 rep read it and still concluded the plan matched. So 0/3 may be a recall regression from v2's "cover it, then check it" ordering. The shipped reviewer prompt (v3) has not been run on the reviewer half, so its K1 recall is unmeasured.
+- **Contamination, disclosed by the agents:** one v1 rep read the later fix commits after its own spikes; one loaded the later released plugin. Recall is counted on the clean reps only (K5's 6/6 below includes the rep that read the fix commits; 5/5 without it). The reviewer prompt now forbids reading later versions of the document or of what it builds.
 
 ## Author half
 
@@ -50,7 +51,7 @@ Three plan reviews elsewhere ran 16, 12 and 11 graded rounds. The reviewer was a
 
 ## Fix-check
 
-Two plain re-reviews of the folded plan each reopened it (one high plus lows; one medium plus lows), raising defects in text the fold never touched. The fix-check (3 reps) returned clean every time, quoted the text resolving each accepted finding, confirmed fixes by mutation and by rebuilding the plan's code, and checked the rejection reasons. **Trade-off:** one plain re-review found K5, a real high in untouched text, which no fix-check surfaced. A later prompt step ("the same problem elsewhere") made the third fix-check report a same-pattern risk on Path B, but still not K5. With the skill, K5 is expected from the round's one review (found 6/6 by the skill's reviewers); where that review is weak, the bounded round leaves the defect to the human's call.
+Two plain re-reviews of the folded plan each reopened it (one high, one medium and three lows; one medium plus four lows), raising defects in text the fold never touched. The fix-check (3 reps) returned clean every time, quoted the text resolving each accepted finding, confirmed fixes by mutation and by rebuilding the plan's code, and checked the rejection reasons. **Trade-off:** one plain re-review found K5, a real high in untouched text, which no fix-check surfaced. A later prompt step ("the same problem elsewhere") made the third fix-check report a same-pattern risk on Path B, but still not K5. With the skill, K5 is expected from the round's one review (found 5/5 by the skill's clean reps); where that review is weak, the bounded round leaves the defect to the human's call.
 
 ## The one-line `/code-review` note on main
 
@@ -58,6 +59,7 @@ With the line, 3/3 agents asked to get a plan reviewed used `reviewing-documents
 
 ## Not tested
 
+- The shipped reviewer prompt (v3) on the reviewer half: K1, K2 and K6 recall are unmeasured for it.
 - The skill's description triggering the skill unprompted (all runs pointed at it by path).
 - A real multi-round run end to end, including the round counter reading the commit subjects.
 - The `main` wording (human partner) beyond the SDD note micro-test.

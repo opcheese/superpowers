@@ -14,7 +14,8 @@ Task tool (general-purpose):
     ## Inputs
 
     - The findings from review [N], each with the author's verdict
-      (accept / reject with reason / backlog with place):
+      (accept / reject with reason / backlog with place / ruling for
+      the decision's owner):
       [findings and verdicts]
     - The fold: `git diff [base]..[head] -- [path]`
     - The document at [head], for the text around the changes.
@@ -28,7 +29,7 @@ Task tool (general-purpose):
        unchanged text that depends on what changed: cross-references,
        counts, steps that use a changed value or name. Report anything the
        fold broke there.
-    3. **Rejections and backlog** are the author's rulings. Don't re-argue
+    3. **Rejections, backlog and rulings** are the author's calls. Don't re-argue
        them. If a rejection's stated reason is factually false and you
        can show it, say so once, with the check.
 
@@ -58,4 +59,4 @@ Task tool (general-purpose):
     the human with the round, not into another review.
 ```
 
-**Commit the fold as part of round N** (`... review N fix-check — ...`), not as a new round.
+**Commit the fix-check's report and verdict as part of round N** (`... review N fix-check — ...`), with no change to the document. Whatever it finds goes to the human; folding it is their call.

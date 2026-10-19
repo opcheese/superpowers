@@ -14,8 +14,8 @@ The author's half of `reviewing-documents` invokes `superpowers:receiving-code-r
 | When to push back, and how: technical reasoning, specific questions, involve the owner if architectural | Kept by reference | Pushback is recorded as a reject verdict with its reason, so it stays on record for the next reviewer and counts toward the false-alarm rate |
 | Pushback you're uncomfortable voicing: name the tension and escalate | Kept by reference | Unchanged |
 | Acknowledging correct feedback: state the fix, no thanks | Kept by reference | The accept line in the commit body is the acknowledgement |
-| Gracefully correcting your pushback | Kept by reference | If a fix-check shows a rejection's reason was false, correct the verdict factually and fold |
+| Gracefully correcting your pushback | Kept by reference | If a fix-check shows a rejection's reason was false, correct the verdict factually and bring it to the human; the fold is their call |
 | Common mistakes table | Kept by reference | Unchanged |
 | GitHub thread replies | Kept by reference | Applies when the review arrives as inline merge-request comments |
 
-What `reviewing-documents` adds on top: the three-way verdict and its tally (the false-alarm rate), treating a reviewer's proposed fix as evidence rather than the fix, settling runnable design with a spike, folding only what was asked, recording decision changes as rulings, round-numbered commit subjects, and the one-review, one-fix-check round.
+What `reviewing-documents` adds on top: a verdict for every finding (accept, reject, backlog, ruling) and its tally (the false-alarm rate), treating a reviewer's proposed fix as evidence rather than the fix, settling runnable design with a spike, folding only what was asked, recording decision changes as rulings, round-numbered commit subjects, and the one-review, one-fix-check round.
