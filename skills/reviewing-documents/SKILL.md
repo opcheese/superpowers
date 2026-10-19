@@ -43,7 +43,7 @@ digraph round {
 
 **Rule on every finding.** See *The author's half*.
 
-**One fix-check, then the human.** Dispatch [fix-check-prompt.md](fix-check-prompt.md) with the findings, your verdicts and the fold diff. It checks that each accepted finding is resolved and that the fold broke nothing in the text whose meaning it changed. It cannot raise new findings on text the fold neither touched nor changed the meaning of. What it notices there, starting with the same problem repeated elsewhere, goes to the human with the round. Its commit carries its report and verdict only, never a fold. Whatever it returns, the round ends with your human partner: show them the verdict tally, any open fix-check finding, and what the fix-check noticed outside its scope.
+**One fix-check, then the human.** Dispatch [fix-check-prompt.md](fix-check-prompt.md) with the findings, your verdicts and the fold diff. It checks that each accepted finding is resolved and that the fold broke nothing in the text whose meaning it changed. It cannot raise new findings on text the fold neither touched nor changed the meaning of. What it notices there, starting with the same problem repeated elsewhere, goes to the human with the round. Its commit carries its report and verdict only, never a fold. Whatever it returns, the round ends with your human partner: show them the verdict tally, any open fix-check finding, the unverified items listed for them, and what the fix-check noticed outside its scope.
 
 **There is no review N+1 inside a round.** A failed fix-check is the second failed round: report it and stop, without folding its findings. Another full review, or the fold for those findings, is the human's call, on a document they have read.
 
@@ -74,7 +74,7 @@ Put the tally in the commit body (`accept 3, reject 2, backlog 1, ruling 0`). Re
 
 **A change to a recorded decision is a ruling, not a fold.** If accepting a finding changes the spec, a ruling, or a decision the document records, ask the decision's owner (your human partner, or whoever they name) before folding it, with the finding and your recommendation. Fold the other findings meanwhile; don't rewrite the decision until they answer, and never quietly in the same commit as the typo fixes.
 
-**Name the round in the commit subject**, so a round counter can read it: `docs(plan): <document> review N — <summary>`, and `docs(plan): <document> review N fix-check — <summary>` for the fix-check's commit, which is part of round N, not a new round. N is one more than the highest `review N` already in the document's commit subjects, or 1 if there is none. Rounds that were never numbered don't count.
+**Name the round in the commit subject**, so a round counter can read it: `docs(plan): <document> review N — <summary>`, and `docs(plan): <document> review N fix-check — <summary>` for the fix-check's commit, which is part of round N, not a new round. N is the highest review number the document's commit subjects already use, in any form (digits, `review round N`, or ordinal words such as `the sixth review`), plus one; or 1 if there is none. Rounds that were never numbered don't count.
 
 ## Trusting a reviewer
 
