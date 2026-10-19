@@ -469,9 +469,11 @@ to waive review for this task, or "waive run" to waive it for the rest of
 this run.
 ```
 
-**Prefer the native reviewer over your own.** It fans out across specialised
-agents and runs a separate verification pass whose only job is killing false
-positives; the task reviewer you dispatched has no such stage. Your reviewer
+**Prefer the native reviewer over your own,** but check what it returns. It
+reviews from several specialised angles, and some of its variants verify each
+finding. Not all do: in Claude Code 2.1.303 the inline variants it runs at
+medium, high and xhigh effort set a findings target and deduplicate without a
+verification pass. Check each finding before it enters the fix loop. Your reviewer
 is the spec-compliance and task-quality gate — the thing native will not do,
 because it reviews a diff and has no idea what the plan required. The two are
 complementary, and this checkpoint is where the second one gets run.
