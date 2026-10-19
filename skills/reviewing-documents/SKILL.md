@@ -47,7 +47,7 @@ digraph round {
 
 **There is no review N+1 inside a round.** A failed fix-check is the second failed round: report it and stop, without folding its findings. Another full review, or the fold for those findings, is the human's call, on a document they have read.
 
-**Limits.** This round trades some recall for precision. A precise reviewer reports fewer findings than one that lists everything, and in testing it missed small mechanical defects a list-everything review caught. The fix-check checks the fold, not the rest of the document, so a serious defect the one review missed, in text the fold didn't touch, reaches the human only as an *outside this check* line or not at all. When the stakes are high, the human can ask for a fresh review; that is a new round, by their decision.
+**Limits.** This round trades some recall for precision. A precise reviewer reports fewer findings than one that lists everything, and in testing it missed small mechanical defects a list-everything review caught. The fix-check checks the fold, not the rest of the document, so a serious defect the one review missed, in text the fold didn't touch, reaches the human only as an *outside this check* line or not at all. Measured on one defective plan, the reviewer found the credential and containment highs in 3/3 runs, but missed a defect it had to infer from a single line (0/3) and most mechanical defects (a parser hang, a fallback path, a test that cannot fail: 0–1/3). A plain review that runs the plan's code found more of them, and reopened an accepted plan every time. When the stakes are high, the human can ask for a fresh review; that is a new round, by their decision.
 
 ## The author's half
 
