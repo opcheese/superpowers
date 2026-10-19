@@ -476,6 +476,8 @@ is the spec-compliance and task-quality gate — the thing native will not do,
 because it reviews a diff and has no idea what the plan required. The two are
 complementary, and this checkpoint is where the second one gets run.
 
+`/code-review` is for code diffs, not plans or other documents: review those with superpowers:reviewing-documents.
+
 Then handle the answer:
 
 - **Findings returned:** they enter the fix loop exactly like reviewer
