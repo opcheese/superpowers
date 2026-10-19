@@ -27,6 +27,7 @@ This fork removes human-oversight gates and interactive prompts, replacing them 
 - **end-of-day-report** / **end-of-week-report** — git-driven activity summaries (author-filtered for multi-author repos)
 - **topic-research** — multi-source technical research with citations
 - **detector-weakening-sweep** — audits git history for checks that quietly stopped being able to fail
+- **reviewing-documents** — one bounded review round for plans and specs: evidenced findings, a verdict per finding, one fix-check, then the human
 
 ## Table of Contents
 
