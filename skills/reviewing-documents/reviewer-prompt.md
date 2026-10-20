@@ -24,6 +24,15 @@ Task tool (general-purpose):
     versions. The review is of the document as it stands, not of how it
     turned out.
 
+    ## Leave the checkout alone
+
+    The checkout you start in is the author's, and they may be working
+    in it while you review. Don't move its HEAD or branch, and don't
+    change its index or working tree. Read other revisions with
+    `git show` and `git diff`. To run anything at a commit, use a
+    worktree of your own (`git worktree add --detach <tmp-dir> <sha>`),
+    and remove it when you finish (`git worktree remove <tmp-dir>`).
+
     ## Rulings already on record
 
     [Rejected findings from earlier rounds, each with its reason, and

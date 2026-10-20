@@ -480,6 +480,8 @@ complementary, and this checkpoint is where the second one gets run.
 
 `/code-review` is for code diffs, not plans or other documents: review those with superpowers:reviewing-documents.
 
+A `/code-review` run in the background or in a forked session can move the checkout it runs in onto the head it reviews, and your next commit then lands on a detached HEAD. Run it from a worktree of its own (`git worktree add --detach <tmp-dir> <head7>`, removed afterwards), not from the checkout you are working in.
+
 Then handle the answer:
 
 - **Findings returned:** they enter the fix loop exactly like reviewer

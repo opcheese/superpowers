@@ -20,6 +20,15 @@ Task tool (general-purpose):
     - The fold: `git diff [base]..[head] -- [path]`
     - The document at [head], for the text around the changes.
 
+    ## Leave the checkout alone
+
+    The checkout you start in is the author's, and they may be working
+    in it while you review. Don't move its HEAD or branch, and don't
+    change its index or working tree. Read other revisions with
+    `git show` and `git diff`. To run anything at a commit, use a
+    worktree of your own (`git worktree add --detach <tmp-dir> <sha>`),
+    and remove it when you finish (`git worktree remove <tmp-dir>`).
+
     ## What to check
 
     1. **Each accepted finding.** Is it resolved at [head]? Quote the text
