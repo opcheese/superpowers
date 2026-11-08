@@ -25,7 +25,8 @@ Dispatch a code reviewer subagent to catch issues before they cascade. The revie
 
 **1. Get git SHAs:**
 ```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or: git merge-base origin/main HEAD
+BASE_SHA=$(git merge-base origin/main HEAD)  # or the commit before this work's first commit
+# Not HEAD~1: it drops every commit but the last from a multi-commit change
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
@@ -57,12 +58,14 @@ is new code to find things in.
   was already fixed or ruled on is not raised again.
 - **Cap: 3 rounds, or 5 when the change touches security, permissions, or
   data loss.** Stop as soon as only Minor findings remain. Inside
-  subagent-driven-development, its fix loop's own cap governs.
+  subagent-driven-development and executing-plans, their own caps govern.
 - **At the cap, stop patching.** If Important findings are still arriving —
   a new edge case each round in the same code — the approach is wrong, not
   the patches. Don't dispatch another round: question the design of that
-  piece, as systematic-debugging does after three failed fixes. Otherwise
-  record what is still open and finish.
+  piece, as systematic-debugging does after three failed fixes. An Important
+  finding still open at the cap is never dropped silently: rule on it with a
+  written reason (why the code stands, what it costs if wrong) and record it
+  with the review; Minor ones are recorded and deferred.
 - **Findings on code the change didn't touch are out of scope** — see
   superpowers:receiving-code-review.
 - **Record the review where the work is handed over** (the PR description,
@@ -111,7 +114,8 @@ You: [Fix progress indicators]
 **Never:**
 - Skip review because "it's simple"
 - Ignore Critical issues
-- Proceed with unfixed Important issues
+- Proceed with unfixed Important issues (at the round cap, each one needs a
+  written ruling instead)
 - Argue with valid technical feedback
 
 **If reviewer wrong:**

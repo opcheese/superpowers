@@ -10,7 +10,8 @@ When you hit a situation that would normally require human judgment, escalate cl
 ## When to Escalate
 
 - Ambiguous requirements with no safe default
-- 2+ failed fix attempts on the same issue
+- 3+ failed fix attempts on the same issue (systematic-debugging's
+  "question the architecture" point)
 - Conflicting constraints that need a product decision
 - Destructive actions without explicit prior authorization
 - External service failures that block the entire task

@@ -102,7 +102,7 @@ IF reviewer suggests "implementing properly":
 
 ```
 FOR multi-item feedback:
-  1. Clarify anything unclear FIRST
+  1. Rule on, or escalate, anything unclear FIRST (nobody is here to ask)
   2. Then implement in this order:
      - Blocking issues (breaks, security)
      - Simple fixes (typos, imports)
