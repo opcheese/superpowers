@@ -47,17 +47,17 @@ took on your human partner's behalf reach them — they read it and rework
 whatever you got wrong. A ruling that dies with the workspace was a decision
 made in secret.
 
-When the final whole-branch review is clean and its fixes are merged,
-delete this plan's workspace (`rm -rf <workspace>`) — the git history is
-the record now. Sibling directories belong to other plans; leave them
-alone.
-
 Then present the completed work to your human partner and wait for their
 explicit verification. Present what was built, test results, deferred minors,
 parked findings, and the rulings you made. If they request changes, address
 them and re-verify. This end-of-run sign-off is required; the per-task reviews
-and native-review checkpoints do not replace it. Only after they have verified
-it, use superpowers:finishing-a-development-branch.
+and native-review checkpoints do not replace it. Keep the workspace until
+they have verified: changes they ask for still need the ledger.
+
+When they have verified and the final review's fixes are merged, delete this
+plan's workspace (`rm -rf <workspace>`) — the git history is the record now.
+Sibling directories belong to other plans; leave them alone. Then use
+superpowers:finishing-a-development-branch.
 
 | Excuse | Reality |
 |--------|---------|

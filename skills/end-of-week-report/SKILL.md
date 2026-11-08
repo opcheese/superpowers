@@ -98,7 +98,7 @@ Read at most 4-5 key files (plans, research docs, CHANGELOG entries). Prioritize
 
 | Source | Read when |
 |--------|-----------|
-| `docs/plans/*.md` | New plans created this week |
+| `docs/superpowers/plans/*.md`, `docs/plans/*.md` | New plans created this week |
 | `docs/research/*.md` | Research published this week |
 | `CHANGELOG.md` | Entries added this week |
 | Eval results / metrics | Performance data from experiments |

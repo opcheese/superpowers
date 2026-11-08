@@ -35,7 +35,7 @@ find . \( -path ./node_modules -prune -o -path ./.git -prune \) \
   | grep -v node_modules | head -20
 
 # Recent plan files
-ls -lt docs/plans/ 2>/dev/null | head -5
+ls -lt docs/superpowers/plans/ docs/plans/ 2>/dev/null | head -8
 ls -lt docs/research/ 2>/dev/null | head -5
 ```
 
@@ -81,7 +81,7 @@ Use additional sources only when they add meaningful context the git log doesn't
 
 | Source | Read when |
 |--------|-----------|
-| `docs/plans/*.md` | Commits reference a plan by name |
+| `docs/superpowers/plans/*.md`, `docs/plans/*.md` | Commits reference a plan by name |
 | `docs/research/*.md` | Research was published today |
 | `CHANGELOG.md` | Entry was added today |
 | Test output / eval results | Commits mention "eval" or "results" |
