@@ -25,6 +25,10 @@ waive review for this task, or "waive run" to waive it for the rest of
 this run.
 ```
 
+Ask through your harness's question tool when it has one (AskUserQuestion in
+Claude Code): a plain-text request at the end of a turn reads like a finished
+thread and gets missed.
+
 Then wait. This is a gate, not a notification, and it is the one place you
 stop between tasks.
 
