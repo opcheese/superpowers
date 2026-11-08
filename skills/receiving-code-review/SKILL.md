@@ -111,6 +111,22 @@ FOR multi-item feedback:
   4. Verify no regressions
 ```
 
+## Findings on Code You Didn't Change
+
+Reviewers often flag code that predates the change. Verify such a finding
+like any other, then:
+
+- **Real:** record it where follow-ups live — an issue, the backlog, or the
+  PR's open items — with the evidence. Don't fix it in this change: it
+  widens the diff, reopens review, and puts two decisions in one PR.
+- **Real and a live security problem:** still a separate change, but say so
+  at the top of the PR and file it as a security issue, not among deferred
+  items.
+- **Not real:** say why, once.
+
+If your change makes the old code reachable in a new way, it is not
+pre-existing for this change: fix it here.
+
 ## When To Push Back
 
 Push back when:

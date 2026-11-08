@@ -45,6 +45,31 @@ Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md
 - Note Minor issues for later
 - Push back if reviewer is wrong (with reasoning)
 
+## Review Rounds
+
+A round is one review plus the fixes it triggers. Rounds don't converge on
+their own: a reviewer asked to find something finds something, and each fix
+is new code to find things in.
+
+- **Round 1 reviews the whole change. Later rounds review only the fix diff
+  and the findings still open.** Hand the reviewer the open findings and the
+  fix range (`FIX_BASE..HEAD`), not the whole branch again. A finding that
+  was already fixed or ruled on is not raised again.
+- **Cap: 3 rounds, or 5 when the change touches security, permissions, or
+  data loss.** Stop as soon as only Minor findings remain. Inside
+  subagent-driven-development, its fix loop's own cap governs.
+- **At the cap, stop patching.** If Important findings are still arriving —
+  a new edge case each round in the same code — the approach is wrong, not
+  the patches. Don't dispatch another round: question the design of that
+  piece, as systematic-debugging does after three failed fixes. Otherwise
+  record what is still open and finish.
+- **Findings on code the change didn't touch are out of scope** — see
+  superpowers:receiving-code-review.
+- **Record the review where the work is handed over** (the PR description,
+  or your final report): rounds run, reviewer model, and the reviewer's last
+  verdict in its own words — including when it was not satisfied. Leaving out
+  an unsatisfied reviewer is hiding a finding.
+
 ## Example
 
 ```
@@ -77,6 +102,8 @@ You: [Fix progress indicators]
 | Excuse | Reality |
 |--------|---------|
 | "I'll just review the diff myself instead of dispatching a reviewer" | You're the coordinator — reviewing the diff inline burns the context window you need to keep driving the work. Dispatch a reviewer subagent: the diff and the evaluation live in its context, and only the findings come back to you. |
+| "One more round and it'll be clean" | Past the cap, rounds don't converge. New findings every round in the same code mean the design is wrong; rethink it. |
+| "The PR reads better without the reviewer's last objections" | The PR is where the next reader learns what the review said. Record the verdict as given. |
 | "The reviewer needs my whole session history to understand the change" | Hand it precisely crafted context, never your session's history. That keeps the reviewer on the work product, not your thought process. |
 
 ## Red Flags
