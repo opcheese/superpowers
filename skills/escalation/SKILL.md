@@ -86,3 +86,10 @@ If other tasks exist that don't depend on the blocked task, proceed with those. 
 - Merge conflicts in files you changed (resolve them)
 
 Only escalate when continuing would require a judgment call you're not authorized to make.
+
+## Rationalizations
+
+| Excuse | Reality |
+|--------|---------|
+| "I'll ask the human and pick this up when they answer" | Nobody is there. Rule on it and ledger the ruling; escalate only for the two classes that have no safe ruling. |
+| "This is close enough to a stop-class to escalate" | Escalation is for a security-sensitive action or a plan where every path is a guess. Everything else is a ruling you are avoiding. |
