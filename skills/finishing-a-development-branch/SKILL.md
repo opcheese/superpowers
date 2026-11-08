@@ -106,6 +106,10 @@ body, adapting field names to the forge:
 - Tests: <pass/fail with count>
 - Linter: <pass/fail>
 
+## Review
+- Rounds: <N>, reviewer model: <model>
+- Last verdict: <the reviewer's own words, satisfied or not>
+
 ## Open items
 <rulings made, parked findings, escalations, and residual review
 findings — or "none">
