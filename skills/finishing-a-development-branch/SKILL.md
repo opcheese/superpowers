@@ -52,6 +52,12 @@ Confirm before merging: merging into the wrong base is expensive to undo.
 
 ## Step 4: Present Options
 
+**Full send:** if your human partner explicitly told you, in this session,
+to merge without asking again ("full send", "merge it when the gates pass"),
+skip the menu: read [references/full-send.md](references/full-send.md) and
+follow it. Nothing else counts as that grant.
+
+
 **Normal repo and named-branch worktree — present exactly these 3 options:**
 
 ```
