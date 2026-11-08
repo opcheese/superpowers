@@ -47,6 +47,18 @@ All of these, checked right before you merge:
       for doesn't clear it: request their re-review and wait.
 - [ ] The branch is up to date with the base and the forge says it is
       mergeable.
+- [ ] The PR's merge danger is a two-way door: reverting the merge undoes it.
+
+## One-way doors
+
+Full send merges two-way doors only. If merging triggers something a revert
+can't undo — a migration that drops columns or deletes data, a removed or
+renamed public API, a message, payment or release that goes out on merge or
+deploy — don't merge, even with every other gate green and good reasons to
+believe it is safe. Leave the PR ready, with the door named in its Merge
+danger section, and ask (see below). If your human partner is away, report
+and wait. The grant was for merging, not for consequences nobody can take
+back.
 
 ## When you are blocked
 
@@ -63,4 +75,5 @@ safe path: leave the PR open and report.
 | "They said merge when green, and CI is green" | Green CI is one item out of five. The grant is for merging when the gates pass. |
 | "I fixed what the reviewer asked, so their block is resolved" | Only the reviewer clears their own "request changes". Ask them to re-review. |
 | "Merging locally is the same thing" | It goes around the PR, its checks and its protection. Merge through the forge. |
+| "It's irreversible, but I checked and it's safe" | Safe is your judgment; irreversible is a fact. A one-way door waits for your human partner. |
 | "They said finish it, which means merge" | Only an explicit grant starts full send. Otherwise, present the menu. |

@@ -127,7 +127,23 @@ git push -u origin <feature-branch>
 Then create the pull/merge request against <base-branch> with the forge's
 tooling — its CLI if one is available, or the creation URL most forges
 print when you push — following the repo's PR template and conventions if
-present, and report the URL to your human partner.
+present, and report the URL to your human partner. With no template, use a
+Summary, then:
+
+```
+## Evidence
+- Before: <failing test run, error output, or screenshot>
+- After: <the same run passing, or the new screenshot>
+
+## Merge danger
+- Door: <two-way: reverting the merge undoes it | one-way: merging triggers
+  something a revert can't undo — say what>
+- Blast radius: <who or what breaks if this is wrong>
+```
+
+plus the review record superpowers:requesting-code-review asks for. A
+one-way door is a destructive migration, deleted data, a removed public API,
+or a message, payment or publish that fires on merge.
 
 Keep the worktree — your human partner iterates on PR feedback there.
 
