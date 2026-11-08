@@ -99,6 +99,15 @@ body, adapting field names to the forge:
 ## Summary
 <2-3 bullets of what changed>
 
+## Evidence
+- Before: <failing test run, error output, or screenshot>
+- After: <the same run passing, or the new screenshot>
+
+## Merge danger
+- Door: <two-way: reverting the merge undoes it | one-way: merging triggers
+  something a revert can't undo — say what>
+- Blast radius: <who or what breaks if this is wrong>
+
 ## Test Plan
 - [ ] <verification steps>
 
@@ -114,6 +123,11 @@ body, adapting field names to the forge:
 <rulings made, parked findings, escalations, and residual review
 findings — or "none">
 ```
+
+Evidence is the same check seen failing and then passing, not a claim. A
+one-way door is a destructive migration, deleted data, a removed public API,
+or a message, payment or publish that fires on merge; name it, so the human
+merging knows a revert won't save them.
 
 Carry every ledger `Ruling:` line, parked finding, escalation, and residual
 final-review finding into that last section, each with what it costs if
